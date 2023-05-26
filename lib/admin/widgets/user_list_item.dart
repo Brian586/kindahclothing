@@ -7,6 +7,7 @@ import 'package:kindah/models/account.dart';
 import 'package:kindah/models/advance_payment.dart';
 import 'package:kindah/models/tariff.dart';
 import 'package:kindah/models/user_payment.dart';
+import 'package:kindah/widgets/custom_tag.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -93,6 +94,9 @@ class _UserListItemState extends State<UserListItem> {
           Fluttertoast.showToast(msg: "An Error Occurred");
         }
       } else {
+        setState(() {
+          file = null;
+        });
         Fluttertoast.showToast(msg: "Cancelled");
       }
     }
@@ -120,12 +124,20 @@ class _UserListItemState extends State<UserListItem> {
 
         int timestamp = DateTime.now().millisecondsSinceEpoch;
 
+        DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(widget.user.id)
+            .get();
+
+        Account account = Account.fromDocument(documentSnapshot);
+
         UserPayment payment = UserPayment(
           id: timestamp.toString(),
           amount: amount,
           timestamp: timestamp,
           paymentType: "order",
           orders: orderIDs,
+          user: account.toMap(),
         );
 
         await FirebaseFirestore.instance
@@ -918,6 +930,36 @@ class _UserListItemState extends State<UserListItem> {
     ];
   }
 
+  Color tagColor() {
+    switch (widget.user.userRole) {
+      case "shop_attendant":
+        return Colors.teal;
+      case "fabric_cutter":
+        return Colors.deepOrange;
+      case "tailor":
+        return Colors.blue;
+      case "finisher":
+        return Colors.lime;
+      default:
+        return Colors.teal;
+    }
+  }
+
+  String displayUserRole() {
+    switch (widget.user.userRole) {
+      case "shop_attendant":
+        return "Shop Attendant";
+      case "fabric_cutter":
+        return "Fabric Cutter";
+      case "tailor":
+        return "Tailor";
+      case "finisher":
+        return "Finisher";
+      default:
+        return "User";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -945,6 +987,10 @@ class _UserListItemState extends State<UserListItem> {
               "+${widget.user.phone!}",
               style: const TextStyle(color: Config.customGrey),
             ),
+            CustomTag(
+              title: displayUserRole(),
+              color: tagColor(),
+            )
           ],
         ),
         children: widget.editing ? userInfo() : userPaymentsAndContacts(),

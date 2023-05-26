@@ -96,6 +96,10 @@ class _UniformListItemState extends State<UniformListItem> {
 
           Fluttertoast.showToast(msg: "An Error Occurred");
         }
+      } else {
+        setState(() {
+          file = null;
+        });
       }
     }
   }
@@ -213,8 +217,8 @@ class _UniformListItemState extends State<UniformListItem> {
       child: ExpansionTile(
         leading: Image.network(
           widget.uniform.imageUrl!,
-          height: 100.0,
-          width: 100.0,
+          height: 150.0,
+          width: 150.0,
           fit: BoxFit.contain,
         ),
         title: Text(widget.uniform.name!),
@@ -223,11 +227,18 @@ class _UniformListItemState extends State<UniformListItem> {
             : [
                 Stack(
                   children: [
-                    Image.memory(
-                      file!.bytes!,
+                    Container(
                       height: 300.0,
                       width: size.width,
-                      fit: BoxFit.cover,
+                      color: Config.customGrey.withOpacity(0.1),
+                    ),
+                    Positioned.fill(
+                      child: Image.network(
+                        widget.uniform.imageUrl!,
+                        height: 300.0,
+                        width: size.width,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                     Positioned.fill(
                       child: file == null
@@ -236,7 +247,7 @@ class _UniformListItemState extends State<UniformListItem> {
                               file!.bytes!,
                               height: 300.0,
                               width: size.width,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                             ),
                     ),
                     Positioned(
@@ -414,11 +425,9 @@ class _UniformListItemState extends State<UniformListItem> {
 
                       measurements.add(uniformMeasurement);
 
-                      Timer(const Duration(seconds: 2), () {
-                        setState(() {
-                          symbolController.clear();
-                          nameMeasureController.clear();
-                        });
+                      setState(() {
+                        symbolController.clear();
+                        nameMeasureController.clear();
                       });
                     } else {
                       Fluttertoast.showToast(msg: "Fill Measurement Form");

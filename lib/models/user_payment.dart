@@ -6,9 +6,15 @@ class UserPayment {
   final int? timestamp;
   final String? paymentType;
   final List<dynamic>? orders;
+  final Map<String, dynamic>? user;
 
   UserPayment(
-      {this.id, this.amount, this.timestamp, this.paymentType, this.orders});
+      {this.id,
+      required this.user,
+      this.amount,
+      this.timestamp,
+      this.paymentType,
+      this.orders});
 
   Map<String, dynamic> toMap() {
     return {
@@ -17,6 +23,7 @@ class UserPayment {
       "amount": amount!.toDouble(),
       "paymentType": paymentType,
       "orders": orders,
+      "user": user
     };
   }
 
@@ -26,6 +33,7 @@ class UserPayment {
         timestamp: doc["timestamp"],
         amount: doc["amount"].toDouble(),
         paymentType: doc["paymentType"],
+        user: doc["user"] ?? {},
         orders: doc["orders"]);
   }
 }

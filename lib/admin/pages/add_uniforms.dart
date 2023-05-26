@@ -387,11 +387,9 @@ class _AddUniformsState extends State<AddUniforms> {
 
                                 measurements.add(uniformMeasurement);
 
-                                Timer(const Duration(seconds: 2), () {
-                                  setState(() {
-                                    symbolController.clear();
-                                    nameMeasureController.clear();
-                                  });
+                                setState(() {
+                                  symbolController.clear();
+                                  nameMeasureController.clear();
                                 });
                               } else {
                                 Fluttertoast.showToast(

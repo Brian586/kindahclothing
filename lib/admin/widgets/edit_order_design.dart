@@ -227,27 +227,26 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
   }
 
   double computeTotalAmount() {
-    _totalAmount = 0.0;
+    double totalAmount = 0.0;
 
-    for (Uniform uniform in se) {
-      _totalAmount = _totalAmount + (uniform.unitPrice! * uniform.quantity!);
+    for (Uniform uniform in selectedUniforms) {
+      totalAmount = totalAmount + (uniform.unitPrice! * uniform.quantity!);
     }
 
-    return _totalAmount;
+    return totalAmount;
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    // double totalAmount = context.watch<UniformProvider>().totalAmount;
-    // List<Uniform> chosenUniforms =
-    //     context.watch<UniformProvider>().chosenUniforms;
 
     return Card(
       child: ExpansionTile(
         childrenPadding: const EdgeInsets.all(10.0),
         onExpansionChanged: (value) {
-          if (!value) {
+          if (value) {
+            setTemplateInfo();
+          } else {
             context.read<UniformProvider>().clearChosenList();
           }
         },
@@ -293,7 +292,6 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
                   .collection("orders")
                   .doc(widget.order.id)
                   .collection("uniforms")
-                  // .limit(2)
                   .get(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
@@ -444,7 +442,7 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
                   height: 20.0,
                 ),
                 Text(
-                  "Total Amount: \nKsh $totalAmount",
+                  "Total Amount: \nKsh ${computeTotalAmount()}",
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                       color: Colors.pink, fontWeight: FontWeight.w800),
@@ -458,8 +456,8 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     TextButton.icon(
-                      onPressed: () =>
-                          updateOrderInfo(context, selectedUniforms, totalAmount),
+                      onPressed: () => updateOrderInfo(
+                          context, selectedUniforms, computeTotalAmount()),
                       icon: const Icon(
                         Icons.edit,
                         color: Colors.green,

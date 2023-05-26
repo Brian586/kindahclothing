@@ -140,6 +140,10 @@ class _SchoolListItemState extends State<SchoolListItem> {
 
             Fluttertoast.showToast(msg: "An Error Occurred!");
           }
+        } else {
+          setState(() {
+            logoFile = null;
+          });
         }
       }
     }

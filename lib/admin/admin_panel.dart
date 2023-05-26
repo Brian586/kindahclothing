@@ -9,6 +9,7 @@ import 'package:kindah/admin/pages/inventory.dart';
 import 'package:kindah/admin/pages/my_tariffs.dart';
 import 'package:kindah/admin/pages/notifications.dart';
 import 'package:kindah/admin/pages/orders_listing.dart';
+import 'package:kindah/admin/pages/payments_listing.dart';
 import 'package:kindah/admin/pages/product_categories.dart';
 import 'package:kindah/admin/pages/products_listing.dart';
 import 'package:kindah/admin/pages/schools_listing.dart';
@@ -121,7 +122,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
       // PAYMENTS
       // case "payments":
-      //   return const Payments();
+      //   return const PaymentsListing();
       // case "advance_payments":
       //   return const AdvancePayments();
 

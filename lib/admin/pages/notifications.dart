@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kindah/models/user_request.dart';
+import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
 import '../widgets/custom_header.dart';
@@ -24,58 +25,64 @@ class _AdminNotificationsState extends State<AdminNotifications> {
           const CustomHeader(
             action: [],
           ),
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection("admins")
-                .doc("0001")
-                .collection("requests")
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return circularProgress();
-              } else {
-                List<UserRequest> userRequests = [];
+          Align(
+            alignment: Alignment.topLeft,
+            child: CustomWrapper(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection("admins")
+                    .doc("0001")
+                    .collection("requests")
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return circularProgress();
+                  } else {
+                    List<UserRequest> userRequests = [];
 
-                snapshot.data!.docs.forEach((element) {
-                  UserRequest request = UserRequest.fromDocument(element);
+                    snapshot.data!.docs.forEach((element) {
+                      UserRequest request = UserRequest.fromDocument(element);
 
-                  userRequests.add(request);
-                });
+                      userRequests.add(request);
+                    });
 
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(userRequests.length, (index) {
-                    UserRequest request = userRequests[index];
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(userRequests.length, (index) {
+                        UserRequest request = userRequests[index];
 
-                    return Card(
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage:
-                              const AssetImage("assets/images/profile.png"),
-                          backgroundColor:
-                              Theme.of(context).primaryColor.withOpacity(0.1),
-                          radius: 20.0,
-                          foregroundImage: request.user!["photoUrl"] == ""
-                              ? null
-                              : NetworkImage(request.user!["photoUrl"]),
-                        ),
-                        title: Text(request.user!["username"]),
-                        subtitle: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(DateFormat("dd MMM, HH:mm a").format(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                    request.timestamp!))),
-                            Text(request.request!)
-                          ],
-                        ),
-                      ),
+                        return Card(
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage:
+                                  const AssetImage("assets/images/profile.png"),
+                              backgroundColor: Theme.of(context)
+                                  .primaryColor
+                                  .withOpacity(0.1),
+                              radius: 20.0,
+                              foregroundImage: request.user!["photoUrl"] == ""
+                                  ? null
+                                  : NetworkImage(request.user!["photoUrl"]),
+                            ),
+                            title: Text(request.user!["username"]),
+                            subtitle: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(DateFormat("dd MMM, HH:mm a").format(
+                                    DateTime.fromMillisecondsSinceEpoch(
+                                        request.timestamp!))),
+                                Text(request.request!)
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
                     );
-                  }),
-                );
-              }
-            },
+                  }
+                },
+              ),
+            ),
           )
         ],
       ),
