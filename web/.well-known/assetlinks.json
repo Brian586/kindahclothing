@@ -1,0 +1,10 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kindahclothing",
+      "sha256_cert_fingerprints":
+      ["EC:B4:AD:9B:21:94:B5:F3:D9:A9:72:B8:2B:CC:41:D6:BC:14:5B:03:28:68:E3:E2:4B:9A:00:CA:56:BC:D6:E9"]
+    }
+  }]
+  

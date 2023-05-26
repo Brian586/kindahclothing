@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "3440730765",
+    "project_id": "kindahclothing",
+    "storage_bucket": "kindahclothing.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:3440730765:android:270545c63adbcaa3dab8c4",
+        "android_client_info": {
+          "package_name": "com.kindahclothing"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "3440730765-afj2ie1mqai6ee179fd4i2p5d9r0qrlc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqHJP-_ePP6TwMV2mjxgQHNiXUNxxnolQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "3440730765-afj2ie1mqai6ee179fd4i2p5d9r0qrlc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "3440730765-q6cg282vgbpvb1kkr69t3n1t3o2ds15b.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kindah"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

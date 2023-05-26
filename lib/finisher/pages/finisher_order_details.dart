@@ -1,0 +1,260 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
+import 'package:kindah/widgets/custom_button.dart';
+import 'package:provider/provider.dart';
+import 'package:kindah/models/order.dart' as template;
+
+import '../../config.dart';
+import '../../models/account.dart';
+import '../../models/uniform.dart';
+import '../../providers/account_provider.dart';
+import '../../widgets/adaptive_ui.dart';
+import '../../widgets/progress_widget.dart';
+import '../../widgets/uniform_data_layout.dart';
+
+class FinisherOrderDetails extends StatefulWidget {
+  final String? templateID;
+  const FinisherOrderDetails({super.key, this.templateID});
+
+  @override
+  State<FinisherOrderDetails> createState() => _FinisherOrderDetailsState();
+}
+
+class _FinisherOrderDetailsState extends State<FinisherOrderDetails> {
+  bool loading = false;
+
+  void finishOrder(template.Order order, Account account) async {
+    setState(() {
+      loading = true;
+    });
+
+    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+        .collection("order_count")
+        .doc("order_count")
+        .get();
+
+    int completedOrders = documentSnapshot["completed"];
+
+    int finishedOrders = documentSnapshot["finished"];
+
+    await FirebaseFirestore.instance
+        .collection("orders")
+        .doc(widget.templateID)
+        .update({
+      "processedStatus": "finished",
+      "assignedStatus": "assigned",
+      "finisher": account.toMap()
+    });
+
+    await FirebaseFirestore.instance
+        .collection("order_count")
+        .doc("order_count")
+        .update({
+      "completed": completedOrders - 1,
+      "finished": finishedOrders + 1,
+    });
+
+    Fluttertoast.showToast(msg: "Updated Successfully!");
+
+    setState(() {
+      loading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    Account account = context.watch<AccountProvider>().account;
+
+    return AdaptiveUI(
+      appbarLeading: IconButton(
+        onPressed: () => Navigator.pop(context),
+        //context.go("/users/${account.userRole}s/${account.id}/home"),
+        icon: const Icon(
+          Icons.arrow_back_ios_rounded,
+          color: Colors.white,
+        ),
+      ),
+      appbarTitle: "Template Details",
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection("orders")
+            .doc(widget.templateID)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return circularProgress();
+          } else {
+            template.Order order = template.Order.fromDocument(snapshot.data!);
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  textAlign: TextAlign.start,
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      const TextSpan(
+                          text: 'Template ID: ',
+                          style: TextStyle(color: Config.customGrey)),
+                      TextSpan(
+                          text: order.id,
+                          style: const TextStyle(color: Config.customBlue)),
+                    ],
+                  ),
+                ),
+                RichText(
+                  textAlign: TextAlign.start,
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      const TextSpan(
+                          text: "Client's Name: ",
+                          style: TextStyle(color: Config.customGrey)),
+                      TextSpan(
+                          text: order.clientName,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Config.customGrey)),
+                    ],
+                  ),
+                ),
+                RichText(
+                  textAlign: TextAlign.start,
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      const TextSpan(
+                          text: "School: ",
+                          style: TextStyle(color: Config.customGrey)),
+                      TextSpan(
+                          text: order.school!["name"],
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Config.customGrey)),
+                    ],
+                  ),
+                ),
+                RichText(
+                  textAlign: TextAlign.start,
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      const TextSpan(
+                          text: "Student Class: ",
+                          style: TextStyle(color: Config.customGrey)),
+                      TextSpan(
+                          text: order.clientClass.toString(),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Config.customGrey)),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                Image.network(
+                  order.school!["imageUrl"],
+                  width: size.width,
+                  height: 200.0,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                Text(
+                  "Ordered on ${DateFormat("MMM dd, HH:mm a").format(DateTime.fromMillisecondsSinceEpoch(order.timestamp!))}",
+                  style: const TextStyle(fontSize: 10.0),
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                const Text(
+                  "Ordered Items",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection("orders")
+                      .doc(order.id)
+                      .collection("uniforms")
+                      .get(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return circularProgress();
+                    } else {
+                      List<Uniform> uniforms = [];
+
+                      snapshot.data!.docs.forEach((element) {
+                        Uniform uniform = Uniform.fromDocument(element);
+
+                        uniforms.add(uniform);
+                      });
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(uniforms.length, (index) {
+                          Uniform uniform = uniforms[index];
+
+                          return UniformDataLayout(
+                            uniform: uniform,
+                            index: index,
+                          );
+                        }),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Amount Paid: \nKsh ${order.totalAmount}",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Colors.pink, fontWeight: FontWeight.w800),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20.0,
+                ),
+                order.processedStatus == "finished"
+                    ? Container()
+                    : const Text(
+                        "After completion, please press the button below...",
+                        textAlign: TextAlign.center,
+                      ),
+                loading
+                    ? Container()
+                    : order.processedStatus == "finished"
+                        ? Align(
+                            alignment: Alignment.center,
+                            child: TextButton.icon(
+                                onPressed: () => Navigator.pop(context),
+                                icon: const Icon(
+                                  Icons.done_rounded,
+                                  color: Colors.green,
+                                ),
+                                label: const Text(
+                                  "Completed",
+                                  style: TextStyle(color: Colors.green),
+                                )),
+                          )
+                        : Align(
+                            alignment: Alignment.center,
+                            child: CustomButton(
+                              onPressed: () => finishOrder(order, account),
+                              title: "Finish Order",
+                              iconData: Icons.done_rounded,
+                            ))
+              ],
+            );
+          }
+        },
+      ),
+    );
+  }
+}
