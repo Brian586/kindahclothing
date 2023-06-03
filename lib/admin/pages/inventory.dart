@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kindah/admin/widgets/product_order_design.dart';
 import 'package:kindah/models/product_order.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
 import '../../POS/widgets/pos_custom_header.dart';
@@ -11,7 +12,8 @@ import '../widgets/custom_header.dart';
 import '../widgets/dash_card.dart';
 
 class Inventory extends StatefulWidget {
-  const Inventory({super.key});
+  final bool isAdmin;
+  const Inventory({super.key, required this.isAdmin});
 
   @override
   State<Inventory> createState() => _InventoryState();
@@ -64,9 +66,13 @@ class _InventoryState extends State<Inventory> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CustomHeader(
-            action: [],
-          ),
+          widget.isAdmin
+              ? const CustomHeader(
+                  action: [],
+                )
+              : const UserCustomHeader(
+                  action: [],
+                ),
           StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
                 .collection("order_count")

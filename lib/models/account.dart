@@ -48,4 +48,17 @@ class Account {
         isNew: doc["isNew"],
         phone: doc["phone"]);
   }
+
+  factory Account.fromJson(doc) {
+    return Account(
+        id: doc["id"],
+        username: doc["username"],
+        email: doc["email"],
+        idNumber: doc["idNumber"],
+        photoUrl: doc["photoUrl"],
+        userRole: doc["userRole"],
+        timestamp: doc["timestamp"],
+        isNew: doc["isNew"],
+        phone: doc["phone"]);
+  }
 }

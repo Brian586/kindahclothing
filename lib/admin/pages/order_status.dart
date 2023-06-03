@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kindah/admin/widgets/order_progress_indicator.dart';
 import 'package:kindah/models/order.dart' as template;
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 
 import '../../POS/widgets/pos_custom_header.dart';
 import '../../config.dart';
@@ -13,7 +14,8 @@ import '../widgets/order_data_card.dart';
 import '../widgets/orders_pie_chart.dart';
 
 class OrderStatus extends StatefulWidget {
-  const OrderStatus({super.key});
+  final bool isAdmin;
+  const OrderStatus({super.key, required this.isAdmin});
 
   @override
   State<OrderStatus> createState() => _OrderStatusState();
@@ -40,9 +42,13 @@ class _OrderStatusState extends State<OrderStatus> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CustomHeader(
-            action: [],
-          ),
+          widget.isAdmin
+              ? const CustomHeader(
+                  action: [],
+                )
+              : const UserCustomHeader(
+                  action: [],
+                ),
           const Align(
               alignment: Alignment.topLeft,
               child: CustomWrapper(child: OrderDataCard())),

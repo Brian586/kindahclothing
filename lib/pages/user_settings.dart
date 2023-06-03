@@ -10,13 +10,16 @@ import 'package:provider/provider.dart';
 import '../config.dart';
 import '../models/account.dart';
 import '../providers/account_provider.dart';
+import '../user_panel/widgets/user_custom_header.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_popup.dart';
 import '../widgets/custom_textfield.dart';
+import '../widgets/custom_wrapper.dart';
 
 class UserSettings extends StatefulWidget {
-  final String? userID;
-  const UserSettings({super.key, this.userID});
+  const UserSettings({
+    super.key,
+  });
 
   @override
   State<UserSettings> createState() => _UserSettingsState();
@@ -52,7 +55,7 @@ class _UserSettingsState extends State<UserSettings> {
               CustomTextField(
                 controller: requestController,
                 hintText: "Type something here...",
-                title: "My Request",
+                title: "Type something",
                 inputType: TextInputType.text,
               ),
             ],
@@ -117,125 +120,136 @@ class _UserSettingsState extends State<UserSettings> {
     idController.text = account.idNumber!;
     userRoleController.text = getUserRole(account);
 
-    return AdaptiveUI(
-        appbarLeading: IconButton(
-          onPressed: () =>
-              context.go("/users/${account.userRole}s/${account.id}/home"),
-          icon: const Icon(
-            Icons.arrow_back_ios_rounded,
-            color: Colors.white,
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const UserCustomHeader(
+            action: [],
           ),
-        ),
-        appbarTitle: "Profile",
-        appbarSubtitle: "Settings",
-        body: loading
-            ? circularProgress()
-            : Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          "My Details",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Config.customGrey),
-                        ),
-                        SizedBox()
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  CircleAvatar(
-                    backgroundImage:
-                        const AssetImage("assets/images/profile.png"),
-                    backgroundColor: Colors.white,
-                    radius: 50.0,
-                    foregroundImage: account.photoUrl! == ""
-                        ? null
-                        : NetworkImage(account.photoUrl!),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  TextField(
-                    controller: nameController,
-                    enabled: false,
-                    keyboardType: TextInputType.name,
-                    style: const TextStyle(color: Config.customGrey),
-                    decoration: const InputDecoration(
-                      hintText: "Name",
-                      labelText: "Name",
-                    ),
-                  ),
-                  TextField(
-                    controller: emailController,
-                    enabled: false,
-                    keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: Config.customGrey),
-                    decoration: const InputDecoration(
-                      hintText: "Email Address",
-                      labelText: "Email Address",
-                    ),
-                  ),
-                  TextField(
-                    controller: phoneController,
-                    enabled: false,
-                    keyboardType: TextInputType.phone,
-                    style: const TextStyle(color: Config.customGrey),
-                    decoration: const InputDecoration(
-                      hintText: "Phone (2547XXXXX)",
-                      labelText: "Phone Number",
-                    ),
-                  ),
-                  TextField(
-                    controller: idController,
-                    enabled: false,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Config.customGrey),
-                    decoration: const InputDecoration(
-                      hintText: "ID Number",
-                      labelText: "ID Number",
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  const Text(
-                    "Request Amin to update your details or delete account",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Config.customGrey),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  CustomButton(
-                    title: "Make Request",
-                    iconData: Icons.chat_outlined,
-                    height: 30.0,
-                    onPressed: () => makeRequest(account),
-                  ),
-                  const SizedBox(
-                    height: 50.0,
-                  ),
-                  TextButton.icon(
-                    onPressed: () => context.go("/home"),
-                    icon: const Icon(
-                      Icons.logout_rounded,
-                      color: Colors.red,
-                    ),
-                    label: const Text(
-                      "LOGOUT",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  )
-                ],
-              ));
+          Align(
+            alignment: Alignment.topLeft,
+            child: CustomWrapper(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: loading
+                    ? circularProgress()
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const [
+                                Text(
+                                  "My Details",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Config.customGrey),
+                                ),
+                                SizedBox()
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 20.0,
+                          ),
+                          CircleAvatar(
+                            backgroundImage:
+                                const AssetImage("assets/images/profile.png"),
+                            backgroundColor: Colors.white,
+                            radius: 50.0,
+                            foregroundImage: account.photoUrl! == ""
+                                ? null
+                                : NetworkImage(account.photoUrl!),
+                          ),
+                          const SizedBox(
+                            height: 20.0,
+                          ),
+                          TextField(
+                            controller: nameController,
+                            enabled: false,
+                            keyboardType: TextInputType.name,
+                            style: const TextStyle(color: Config.customGrey),
+                            decoration: const InputDecoration(
+                              hintText: "Name",
+                              labelText: "Name",
+                            ),
+                          ),
+                          TextField(
+                            controller: emailController,
+                            enabled: false,
+                            keyboardType: TextInputType.emailAddress,
+                            style: const TextStyle(color: Config.customGrey),
+                            decoration: const InputDecoration(
+                              hintText: "Email Address",
+                              labelText: "Email Address",
+                            ),
+                          ),
+                          TextField(
+                            controller: phoneController,
+                            enabled: false,
+                            keyboardType: TextInputType.phone,
+                            style: const TextStyle(color: Config.customGrey),
+                            decoration: const InputDecoration(
+                              hintText: "Phone (2547XXXXX)",
+                              labelText: "Phone Number",
+                            ),
+                          ),
+                          TextField(
+                            controller: idController,
+                            enabled: false,
+                            keyboardType: TextInputType.number,
+                            style: const TextStyle(color: Config.customGrey),
+                            decoration: const InputDecoration(
+                              hintText: "ID Number",
+                              labelText: "ID Number",
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 20.0,
+                          ),
+                          const Text(
+                            "Request Amin to update your details or delete account",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Config.customGrey),
+                          ),
+                          const SizedBox(
+                            height: 20.0,
+                          ),
+                          CustomButton(
+                            title: "Make Request",
+                            iconData: Icons.chat_outlined,
+                            height: 30.0,
+                            onPressed: () => makeRequest(account),
+                          ),
+                          const SizedBox(
+                            height: 50.0,
+                          ),
+                          TextButton.icon(
+                            onPressed: () => context.go("/home"),
+                            icon: const Icon(
+                              Icons.logout_rounded,
+                              color: Colors.red,
+                            ),
+                            label: const Text(
+                              "LOGOUT",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 50.0,
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }

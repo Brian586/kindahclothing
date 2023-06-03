@@ -22,7 +22,7 @@ List<IntroPage> introScreens = [
     userType: "shop_attendant",
   ),
   IntroPage(
-    image: Icon(
+    image: const Icon(
       Icons.currency_exchange,
       size: 60.0,
       color: Colors.white38,
@@ -36,7 +36,7 @@ List<IntroPage> introScreens = [
     userType: "shop_attendant",
   ),
   IntroPage(
-    image: Icon(
+    image: const Icon(
       Icons.thumb_up_alt_outlined,
       size: 60.0,
       color: Colors.white38,
@@ -98,7 +98,7 @@ List<IntroPage> introScreens = [
     userType: "tailor",
   ),
   IntroPage(
-    image: Icon(
+    image: const Icon(
       Icons.thumb_up_alt_outlined,
       size: 60.0,
       color: Colors.white38,
@@ -110,5 +110,23 @@ List<IntroPage> introScreens = [
       style: TextStyle(color: Colors.white60),
     ),
     userType: "tailor",
+  ),
+  IntroPage(
+    image: Image.asset("assets/images/template_shimmer.png",
+        width: 250.0, fit: BoxFit.contain),
+    title: "1. Select available template",
+    body: const SizedBox(
+      height: 0.0,
+      width: 0.0,
+    ),
+    userType: "finisher",
+  ),
+  IntroPage(
+    image: Image.asset("assets/images/fabric_cutter.png",
+        width: 200.0, fit: BoxFit.contain),
+    title: "2. Pick order for Processing",
+    body: Image.asset("assets/images/process_shimmer.png",
+        width: 150.0, fit: BoxFit.contain),
+    userType: "finisher",
   ),
 ];

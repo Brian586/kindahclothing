@@ -5,6 +5,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindah/common_functions/update_done_orders.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/models/order.dart' as template;
 import 'package:kindah/models/school.dart';
@@ -140,6 +141,9 @@ class _AddTemplateState extends State<AddTemplate> {
             .update({
           "count": count + 1,
         });
+
+        // UPDATE DONE ORDER=========================================
+        await UpdateDoneOrders.updatePendingOrders(account, order.id!);
 
         Fluttertoast.showToast(msg: "Template Uploaded Successfully!");
 

@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:kindah/models/product.dart';
 
+import '../../common_functions/update_admin_info.dart';
 import '../../config.dart';
 import '../../widgets/custom_popup.dart';
 import '../../widgets/custom_textfield.dart';
@@ -140,6 +141,8 @@ class _ProductListingItemState extends State<ProductListingItem> {
           .get();
 
       await doc.reference.delete();
+
+      await UpdateAdminInfo().updateProductsCount(widget.product, false);
 
       Fluttertoast.showToast(msg: "Deleted Successfully!");
     } else {

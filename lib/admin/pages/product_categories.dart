@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/config.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
@@ -10,7 +11,8 @@ import '../../widgets/custom_textfield.dart';
 import '../widgets/custom_header.dart';
 
 class ProductCategories extends StatefulWidget {
-  const ProductCategories({super.key});
+  final bool isAdmin;
+  const ProductCategories({super.key, required this.isAdmin});
 
   @override
   State<ProductCategories> createState() => _ProductCategoriesState();
@@ -120,16 +122,29 @@ class _ProductCategoriesState extends State<ProductCategories> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CustomHeader(
-                  action: [
-                    CustomButton(
-                      onPressed: () => promptAddCategory(context, categories),
-                      title: "Add Category",
-                      iconData: Icons.add,
-                      height: 30.0,
-                    )
-                  ],
-                ),
+                widget.isAdmin
+                    ? CustomHeader(
+                        action: [
+                          CustomButton(
+                            onPressed: () =>
+                                promptAddCategory(context, categories),
+                            title: "Add Category",
+                            iconData: Icons.add,
+                            height: 30.0,
+                          )
+                        ],
+                      )
+                    : UserCustomHeader(
+                        action: [
+                          CustomButton(
+                            onPressed: () =>
+                                promptAddCategory(context, categories),
+                            title: "Add Category",
+                            iconData: Icons.add,
+                            height: 30.0,
+                          )
+                        ],
+                      ),
                 Align(
                   alignment: Alignment.topLeft,
                   child: CustomWrapper(

@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:kindah/config.dart';
 import 'package:kindah/models/user_payment.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 
 import '../../widgets/custom_wrapper.dart';
 import '../../widgets/progress_widget.dart';
 import '../widgets/custom_header.dart';
+import '../widgets/payment_list_item.dart';
 
 class PaymentsListing extends StatefulWidget {
-  const PaymentsListing({super.key});
+  final bool isAdmin;
+  const PaymentsListing({super.key, required this.isAdmin});
 
   @override
   State<PaymentsListing> createState() => _PaymentsListingState();
@@ -23,9 +24,13 @@ class _PaymentsListingState extends State<PaymentsListing> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CustomHeader(
-            action: [],
-          ),
+          widget.isAdmin
+              ? const CustomHeader(
+                  action: [],
+                )
+              : const UserCustomHeader(
+                  action: [],
+                ),
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection("user_payments")
@@ -47,39 +52,19 @@ class _PaymentsListingState extends State<PaymentsListing> {
                     child: Text("No Payments Available"),
                   );
                 } else {
-                  return CustomWrapper(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.generate(payments.length, (index) {
-                        UserPayment payment = payments[index];
-                        bool isAdvance = payment.paymentType == "advance";
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomWrapper(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(payments.length, (index) {
+                          UserPayment payment = payments[index];
 
-                        return ExpansionTile(
-                          leading: const Icon(
-                            Icons.payment_rounded,
-                            color: Config.customGrey,
-                          ),
-                          title: Text(payment.id!),
-                          subtitle: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Paid on: ${DateFormat("HH:mm a - dd, MMM").format(DateTime.fromMillisecondsSinceEpoch(payment.timestamp!))}",
-                                style: const TextStyle(fontSize: 12.0),
-                              ),
-                              Text(
-                                  "Paid To: ${payment.user!["username"]}, ${payment.user!["userRole"].split("_").join(" ")}.")
-                            ],
-                          ),
-                          trailing: Text(
-                            "Ksh ${payment.amount.toString()}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: isAdvance ? Colors.red : Colors.green),
-                          ),
-                        );
-                      }),
+                          return PaymentListItem(
+                            payment: payment,
+                          );
+                        }),
+                      ),
                     ),
                   );
                 }

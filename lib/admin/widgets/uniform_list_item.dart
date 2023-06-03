@@ -9,6 +9,7 @@ import 'package:kindah/models/uniform.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
 import '../../common_functions/custom_file_picker.dart';
+import '../../common_functions/update_admin_info.dart';
 import '../../common_functions/uploader.dart';
 import '../../config.dart';
 import '../../models/admin.dart';
@@ -163,13 +164,6 @@ class _UniformListItemState extends State<UniformListItem> {
     }
   }
 
-  Future<void> updateAdminCount(Admin admin, Map<String, dynamic> map) async {
-    await FirebaseFirestore.instance
-        .collection("admins")
-        .doc(admin.id)
-        .update(map);
-  }
-
   void promptUniformDeletion() async {
     String res = await showDialog(
         context: context,
@@ -194,16 +188,7 @@ class _UniformListItemState extends State<UniformListItem> {
         }
       });
 
-      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-          .collection("admins")
-          .doc("0001")
-          .get();
-
-      Admin updatedAdmin = Admin.fromDocument(documentSnapshot);
-
-      await updateAdminCount(updatedAdmin, {
-        "uniforms": updatedAdmin.uniforms! - 1,
-      });
+      await UpdateAdminInfo().updateUniformsCount(widget.uniform, false);
 
       Fluttertoast.showToast(msg: "Uniform Deleted Successfully");
     }
@@ -295,6 +280,7 @@ class _UniformListItemState extends State<UniformListItem> {
                     clearButtonProps: const ClearButtonProps(isVisible: true),
                     popupProps: PopupProps.menu(
                       disabledItemFn: (dynamic s) => s.startsWith('A'),
+                      showSelectedItems: true,
                       itemBuilder: (context, category, isSelected) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(
@@ -324,6 +310,7 @@ class _UniformListItemState extends State<UniformListItem> {
                         ),
                       ),
                     ),
+                    selectedItem: selectedCategory,
                     onChanged: (value) {
                       setState(() {
                         selectedCategory = value!;

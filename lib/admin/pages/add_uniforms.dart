@@ -5,7 +5,9 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/models/uniform.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:provider/provider.dart';
 
 import '../../common_functions/custom_file_picker.dart';
@@ -20,7 +22,8 @@ import '../../widgets/progress_widget.dart';
 import '../widgets/custom_header.dart';
 
 class AddUniforms extends StatefulWidget {
-  const AddUniforms({super.key});
+  final bool isAdmin;
+  const AddUniforms({super.key, required this.isAdmin});
 
   @override
   State<AddUniforms> createState() => _AddUniformsState();
@@ -49,14 +52,7 @@ class _AddUniformsState extends State<AddUniforms> {
     }
   }
 
-  Future<void> updateAdminCount(Admin admin, Map<String, dynamic> map) async {
-    await FirebaseFirestore.instance
-        .collection("admins")
-        .doc(admin.id)
-        .update(map);
-  }
-
-  void saveUniformToFirestore(Admin admin) async {
+  void saveUniformToFirestore() async {
     setState(() {
       loading = true;
     });
@@ -86,16 +82,7 @@ class _AddUniformsState extends State<AddUniforms> {
           .doc(uniform.id)
           .set(uniform.toMap());
 
-      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-          .collection("admins")
-          .doc(admin.id)
-          .get();
-
-      Admin updatedAdmin = Admin.fromDocument(documentSnapshot);
-
-      await updateAdminCount(admin, {
-        "uniforms": updatedAdmin.uniforms! + 1,
-      });
+      await UpdateAdminInfo().updateUniformsCount(uniform, true);
 
       Fluttertoast.showToast(
           msg:
@@ -150,7 +137,6 @@ class _AddUniformsState extends State<AddUniforms> {
 
   @override
   Widget build(BuildContext context) {
-    Admin admin = context.watch<AdminProvider>().admin;
     Size size = MediaQuery.of(context).size;
 
     return loading
@@ -160,9 +146,13 @@ class _AddUniformsState extends State<AddUniforms> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CustomHeader(
-                  action: [],
-                ),
+                widget.isAdmin
+                    ? const CustomHeader(
+                        action: [],
+                      )
+                    : const UserCustomHeader(
+                        action: [],
+                      ),
                 Align(
                   alignment: Alignment.topLeft,
                   child: CustomWrapper(
@@ -414,7 +404,7 @@ class _AddUniformsState extends State<AddUniforms> {
                                   file != null &&
                                   measurements.isNotEmpty &&
                                   priceController.text.isNotEmpty) {
-                                saveUniformToFirestore(admin);
+                                saveUniformToFirestore();
                               } else {
                                 Fluttertoast.showToast(
                                     msg: "Fill in the required fields");

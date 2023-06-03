@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/models/order.dart' as template;
 import 'package:kindah/config.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,8 @@ import '../../widgets/custom_textfield.dart';
 import '../widgets/custom_header.dart';
 
 class AddOrder extends StatefulWidget {
-  const AddOrder({super.key});
+  final bool isAdmin;
+  const AddOrder({super.key, required this.isAdmin});
 
   @override
   State<AddOrder> createState() => _AddOrderState();
@@ -220,9 +222,13 @@ class _AddOrderState extends State<AddOrder> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CustomHeader(
-            action: [],
-          ),
+          widget.isAdmin
+              ? const CustomHeader(
+                  action: [],
+                )
+              : const UserCustomHeader(
+                  action: [],
+                ),
           loading
               ? circularProgress()
               : Align(

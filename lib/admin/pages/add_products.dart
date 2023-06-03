@@ -4,10 +4,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/admin/widgets/custom_header.dart';
+import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/common_functions/uploader.dart';
 import 'package:kindah/models/admin.dart';
 import 'package:kindah/models/product.dart';
 import 'package:kindah/providers/admin_provider.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -19,7 +21,8 @@ import '../../widgets/custom_textfield.dart';
 import '../../widgets/custom_wrapper.dart';
 
 class AddProducts extends StatefulWidget {
-  const AddProducts({super.key});
+  final bool isAdmin;
+  const AddProducts({super.key, required this.isAdmin});
 
   @override
   State<AddProducts> createState() => _AddProductsState();
@@ -63,7 +66,7 @@ class _AddProductsState extends State<AddProducts> {
     }
   }
 
-  void saveProductToFirestore(Admin admin) async {
+  void saveProductToFirestore() async {
     setState(() {
       loading = true;
     });
@@ -87,7 +90,7 @@ class _AddProductsState extends State<AddProducts> {
           description: descriptionController.text,
           category: selectedCategory,
           images: downloadUrls,
-          publisher: admin.id,
+          publisher: "0001",
           quantity: 1,
           searchKeys:
               titleController.text.trim().toLowerCase().split(" ").toList(),
@@ -99,19 +102,7 @@ class _AddProductsState extends State<AddProducts> {
           .doc(product.id)
           .set(product.toMap());
 
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection("admins")
-          .doc(admin.id)
-          .get();
-
-      Admin updatedAdmin = Admin.fromDocument(doc);
-
-      await FirebaseFirestore.instance
-          .collection("admins")
-          .doc(admin.id)
-          .update({
-        "products": updatedAdmin.products! + 1,
-      });
+      await UpdateAdminInfo().updateProductsCount(product, true);
 
       Fluttertoast.showToast(msg: "Product Uploaded Successfully!");
 
@@ -184,8 +175,6 @@ class _AddProductsState extends State<AddProducts> {
 
   @override
   Widget build(BuildContext context) {
-    Admin admin = context.watch<AdminProvider>().admin;
-
     return loading
         ? circularProgress()
         : SingleChildScrollView(
@@ -193,16 +182,27 @@ class _AddProductsState extends State<AddProducts> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CustomHeader(
-                  action: [
-                    CustomButton(
-                      onPressed: () => pickPhotos(),
-                      height: 30.0,
-                      title: "Pick Photos",
-                      iconData: Icons.add_a_photo_rounded,
-                    )
-                  ],
-                ),
+                widget.isAdmin
+                    ? CustomHeader(
+                        action: [
+                          CustomButton(
+                            onPressed: () => pickPhotos(),
+                            height: 30.0,
+                            title: "Pick Photos",
+                            iconData: Icons.add_a_photo_rounded,
+                          )
+                        ],
+                      )
+                    : UserCustomHeader(
+                        action: [
+                          CustomButton(
+                            onPressed: () => pickPhotos(),
+                            height: 30.0,
+                            title: "Pick Photos",
+                            iconData: Icons.add_a_photo_rounded,
+                          )
+                        ],
+                      ),
                 displayImages(),
                 Align(
                   alignment: Alignment.topLeft,
@@ -276,7 +276,7 @@ class _AddProductsState extends State<AddProducts> {
                                   selectedCategory != "" &&
                                   images.isNotEmpty &&
                                   descriptionController.text.isNotEmpty) {
-                                saveProductToFirestore(admin);
+                                saveProductToFirestore();
                               } else {
                                 Fluttertoast.showToast(
                                     msg: "Fill in the required fields");

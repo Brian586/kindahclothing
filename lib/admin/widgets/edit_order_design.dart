@@ -368,7 +368,7 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
                   asyncItems: (String? filter) => getSchools(filter!),
                   clearButtonProps: const ClearButtonProps(isVisible: true),
                   popupProps: PopupProps.menu(
-                    //showSelectedItems: true,
+                    showSelectedItems: true,
                     itemBuilder: _customPopupItemBuilder,
                     showSearchBox: true,
                     searchFieldProps: TextFieldProps(

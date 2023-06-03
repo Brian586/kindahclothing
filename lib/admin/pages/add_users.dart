@@ -4,22 +4,25 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/common_functions/custom_file_picker.dart';
+import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/common_functions/uploader.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/models/account.dart';
 import 'package:kindah/models/admin.dart';
 import 'package:kindah/providers/admin_provider.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:kindah/widgets/custom_textfield.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
-import 'package:provider/provider.dart';
 
 import '../widgets/custom_header.dart';
 
 class AddUsers extends StatefulWidget {
+  final bool isAdmin;
   const AddUsers({
     super.key,
+    required this.isAdmin,
   });
 
   @override
@@ -46,14 +49,7 @@ class _AddUsersState extends State<AddUsers> {
     }
   }
 
-  Future<void> updateAdminCount(Admin admin, Map<String, dynamic> map) async {
-    await FirebaseFirestore.instance
-        .collection("admins")
-        .doc(admin.id)
-        .update(map);
-  }
-
-  void saveUserToFirestore(Admin admin) async {
+  void saveUserToFirestore() async {
     setState(() {
       loading = true;
     });
@@ -85,35 +81,7 @@ class _AddUsersState extends State<AddUsers> {
           .doc(account.id)
           .set(account.toMap());
 
-      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-          .collection("admins")
-          .doc(admin.id)
-          .get();
-
-      Admin updatedAdmin = Admin.fromDocument(documentSnapshot);
-
-      switch (userRole) {
-        case "tailor":
-          await updateAdminCount(admin, {
-            "tailors": updatedAdmin.tailors! + 1,
-          });
-          break;
-        case "fabric_cutter":
-          await updateAdminCount(admin, {
-            "fabricCutters": updatedAdmin.fabricCutters! + 1,
-          });
-          break;
-        case "shop_attendant":
-          await updateAdminCount(admin, {
-            "shopAttendants": updatedAdmin.shopAttendants! + 1,
-          });
-          break;
-        case "finisher":
-          await updateAdminCount(admin, {
-            "finishers": updatedAdmin.finishers! + 1,
-          });
-          break;
-      }
+      await UpdateAdminInfo().updateUserCount(account, true);
 
       Fluttertoast.showToast(
           msg:
@@ -140,8 +108,6 @@ class _AddUsersState extends State<AddUsers> {
 
   @override
   Widget build(BuildContext context) {
-    Admin admin = context.watch<AdminProvider>().admin;
-
     return loading
         ? circularProgress()
         : SingleChildScrollView(
@@ -149,9 +115,13 @@ class _AddUsersState extends State<AddUsers> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CustomHeader(
-                  action: [],
-                ),
+                widget.isAdmin
+                    ? const CustomHeader(
+                        action: [],
+                      )
+                    : const UserCustomHeader(
+                        action: [],
+                      ),
                 Align(
                   alignment: Alignment.topLeft,
                   child: CustomWrapper(
@@ -288,7 +258,7 @@ class _AddUsersState extends State<AddUsers> {
                               if (nameController.text.isNotEmpty &&
                                   phoneController.text.isNotEmpty &&
                                   idController.text.isNotEmpty) {
-                                saveUserToFirestore(admin);
+                                saveUserToFirestore();
                               } else {
                                 Fluttertoast.showToast(
                                     msg: "Fill in the required fields");

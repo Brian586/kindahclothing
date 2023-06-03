@@ -1,17 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 
 import '../../models/account.dart';
-import '../../models/admin.dart';
-import '../../providers/admin_provider.dart';
 import '../../widgets/custom_wrapper.dart';
 import '../../widgets/progress_widget.dart';
 import '../widgets/custom_header.dart';
 import '../widgets/user_list_item.dart';
 
 class EditUsers extends StatefulWidget {
-  const EditUsers({super.key});
+  final bool isAdmin;
+  const EditUsers({super.key, required this.isAdmin});
 
   @override
   State<EditUsers> createState() => _EditUsersState();
@@ -25,9 +24,13 @@ class _EditUsersState extends State<EditUsers> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CustomHeader(
-            action: [],
-          ),
+          widget.isAdmin
+              ? const CustomHeader(
+                  action: [],
+                )
+              : const UserCustomHeader(
+                  action: [],
+                ),
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance.collection("users").snapshots(),
             builder: (context, snapshot) {

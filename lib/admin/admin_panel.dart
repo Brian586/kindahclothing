@@ -4,6 +4,7 @@ import 'package:kindah/admin/pages/add_products.dart';
 import 'package:kindah/admin/pages/add_schools.dart';
 import 'package:kindah/admin/pages/add_users.dart';
 import 'package:kindah/admin/pages/admin_settings.dart';
+import 'package:kindah/admin/pages/advance_payments_listing.dart';
 import 'package:kindah/admin/pages/dashboard.dart';
 import 'package:kindah/admin/pages/inventory.dart';
 import 'package:kindah/admin/pages/my_tariffs.dart';
@@ -78,59 +79,101 @@ class _AdminPanelState extends State<AdminPanel> {
 
       // USERS
       case "add_users":
-        return const AddUsers();
+        return const AddUsers(
+          isAdmin: true,
+        );
       case "edit_users":
-        return const EditUsers();
+        return const EditUsers(
+          isAdmin: true,
+        );
       case "users":
-        return const UsersListing();
+        return const UsersListing(
+          isAdmin: true,
+        );
 
       // ECOMMERCE PRODUCTS
       case "products":
-        return const ProductsListing();
+        return const ProductsListing(
+          isAdmin: true,
+        );
       case "add_products":
-        return const AddProducts();
+        return const AddProducts(
+          isAdmin: true,
+        );
       case "edit_products":
-        return const EditProducts();
+        return const EditProducts(
+          isAdmin: true,
+        );
       case "product_categories":
-        return const ProductCategories();
+        return const ProductCategories(
+          isAdmin: true,
+        );
 
       // SCHOOLS
       case "schools":
-        return const SchoolsListing();
+        return const SchoolsListing(
+          isAdmin: true,
+        );
       case "add_schools":
-        return const AddSchools();
+        return const AddSchools(
+          isAdmin: true,
+        );
       case "edit_schools":
-        return const EditSchools();
+        return const EditSchools(
+          isAdmin: true,
+        );
 
       // UNIFORMS
       case "add_uniforms":
-        return const AddUniforms();
+        return const AddUniforms(
+          isAdmin: true,
+        );
       case "edit_uniforms":
-        return const EditUniforms();
+        return const EditUniforms(
+          isAdmin: true,
+        );
       case "uniforms":
-        return const UniformsListing();
+        return const UniformsListing(
+          isAdmin: true,
+        );
 
       // ORDERS
       case "orders":
-        return const OrdersListing();
+        return const OrdersListing(
+          isAdmin: true,
+        );
       case "order_status":
-        return const OrderStatus();
+        return const OrderStatus(
+          isAdmin: true,
+        );
       case "add_order":
-        return const AddOrder();
+        return const AddOrder(
+          isAdmin: true,
+        );
       case "edit_orders":
-        return const EditOrder();
+        return const EditOrder(
+          isAdmin: true,
+        );
 
       // PAYMENTS
-      // case "payments":
-      //   return const PaymentsListing();
-      // case "advance_payments":
-      //   return const AdvancePayments();
+      case "payments":
+        return const PaymentsListing(
+          isAdmin: true,
+        );
+      case "advance_payments":
+        return const AdvancePaymentsListing(
+          isAdmin: true,
+        );
 
       // OTHERS
       case "my_tariffs":
-        return const MyTariffs();
+        return const MyTariffs(
+          isAdmin: true,
+        );
       case "inventory":
-        return const Inventory();
+        return const Inventory(
+          isAdmin: true,
+        );
       case "settings":
         return const AdminSettings();
       case "notifications":

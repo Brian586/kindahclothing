@@ -10,6 +10,22 @@ import '../../models/drawer_item.dart';
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
 
+  Widget groupedDrawerItems(String title, int firstIndex, int lastIndex) {
+    List<DrawerItem> groupedItems = drawerItems
+        .where((item) =>
+            drawerItems.indexOf(item) >= firstIndex &&
+            drawerItems.indexOf(item) <= lastIndex)
+        .toList();
+
+    return CustomExpansionTile(
+        item: groupedItems[0],
+        title: title,
+        children: List.generate(
+          groupedItems.length,
+          (index) => DrawerItemDesign(item: drawerItems[(firstIndex + index)]),
+        ));
+  }
+
   Widget buildDrawerItemDesign(
       BuildContext context, int index, DrawerItem item) {
     if (index == 0 || index == 20 || index == 21 || index == 22) {
@@ -17,45 +33,17 @@ class CustomDrawer extends StatelessWidget {
         item: item,
       );
     } else if (index == 1) {
-      return CustomExpansionTile(item: item, title: "Orders", children: [
-        DrawerItemDesign(item: drawerItems[1]),
-        DrawerItemDesign(item: drawerItems[2]),
-        DrawerItemDesign(item: drawerItems[3]),
-        DrawerItemDesign(item: drawerItems[4]),
-      ]);
+      return groupedDrawerItems("Orders", 1, 4);
     } else if (index == 5) {
-      return CustomExpansionTile(item: item, title: "Schools", children: [
-        DrawerItemDesign(item: drawerItems[5]),
-        DrawerItemDesign(item: drawerItems[6]),
-        DrawerItemDesign(item: drawerItems[7])
-      ]);
+      return groupedDrawerItems("Schools", 5, 7);
     } else if (index == 8) {
-      return CustomExpansionTile(item: item, title: "Uniforms", children: [
-        DrawerItemDesign(item: drawerItems[8]),
-        DrawerItemDesign(item: drawerItems[9]),
-        DrawerItemDesign(item: drawerItems[10]),
-      ]);
+      return groupedDrawerItems("Uniforms", 8, 10);
     } else if (index == 11) {
-      return CustomExpansionTile(item: item, title: "Users", children: [
-        DrawerItemDesign(item: drawerItems[11]),
-        DrawerItemDesign(item: drawerItems[12]),
-        DrawerItemDesign(item: drawerItems[13]),
-      ]);
+      return groupedDrawerItems("Users", 11, 13);
     } else if (index == 14) {
-      return CustomExpansionTile(item: item, title: "Payments", children: [
-        DrawerItemDesign(item: drawerItems[14]),
-        DrawerItemDesign(item: drawerItems[15]),
-      ]);
+      return groupedDrawerItems("Payments", 14, 15);
     } else if (index == 16) {
-      return CustomExpansionTile(
-          item: item,
-          title: "Ecommerce Products",
-          children: [
-            DrawerItemDesign(item: drawerItems[16]),
-            DrawerItemDesign(item: drawerItems[17]),
-            DrawerItemDesign(item: drawerItems[18]),
-            DrawerItemDesign(item: drawerItems[19]),
-          ]);
+      return groupedDrawerItems("Ecommerce Products", 16, 19);
     } else {
       return Container();
     }

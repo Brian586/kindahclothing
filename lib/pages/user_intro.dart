@@ -24,50 +24,55 @@ class _UserIntroState extends State<UserIntro> {
         )
         .toList();
 
-    return IntroductionScreen(
-      key: introKey,
-      globalBackgroundColor: Config.customBlue.withOpacity(0.4),
-      pages: List.generate(userScreens.length, (index) {
-        IntroPage page = userScreens[index];
+    return Scaffold(
+      backgroundColor: Colors.black,
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      body: IntroductionScreen(
+        key: introKey,
+        globalBackgroundColor: Config.customBlue.withOpacity(0.4),
+        pages: List.generate(userScreens.length, (index) {
+          IntroPage page = userScreens[index];
 
-        return PageViewModel(
-            image: page.image,
-            title: page.title,
-            bodyWidget: page.body,
-            decoration: const PageDecoration(
-                titleTextStyle: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w700)));
-      }),
-      showSkipButton: true,
-      skip: TextButton(
-        onPressed: () => introKey.currentState?.skipToEnd(),
-        child: const Text(
-          "SKIP",
-          style: TextStyle(color: Colors.white),
+          return PageViewModel(
+              image: page.image,
+              title: page.title,
+              bodyWidget: page.body,
+              decoration: const PageDecoration(
+                  titleTextStyle: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w700)));
+        }),
+        showSkipButton: true,
+        skip: TextButton(
+          onPressed: () => introKey.currentState?.skipToEnd(),
+          child: const Text(
+            "SKIP",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
-      ),
-      next: TransparentButton(
-        onPressed: () => introKey.currentState?.next(),
-        title: "NEXT",
-      ),
-      done: TransparentButton(
-        onPressed: () => Navigator.pop(context),
-        title: "DONE",
-      ),
-      onDone: () {
-        // On Done button pressed
-      },
-      onSkip: () {
-        // On Skip button pressed
-      },
-      dotsDecorator: DotsDecorator(
-        size: const Size.square(10.0),
-        activeSize: const Size(20.0, 10.0),
-        activeColor: Colors.white, // Theme.of(context).colorScheme.secondary,
-        color: Colors.black26,
-        spacing: const EdgeInsets.symmetric(horizontal: 3.0),
-        activeShape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
+        next: TransparentButton(
+          onPressed: () => introKey.currentState?.next(),
+          title: "NEXT",
+        ),
+        done: TransparentButton(
+          onPressed: () => Navigator.pop(context),
+          title: "DONE",
+        ),
+        onDone: () {
+          // On Done button pressed
+        },
+        onSkip: () {
+          // On Skip button pressed
+        },
+        dotsDecorator: DotsDecorator(
+          size: const Size.square(10.0),
+          activeSize: const Size(20.0, 10.0),
+          activeColor: Colors.white, // Theme.of(context).colorScheme.secondary,
+          color: Colors.black26,
+          spacing: const EdgeInsets.symmetric(horizontal: 3.0),
+          activeShape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0)),
+        ),
       ),
     );
   }

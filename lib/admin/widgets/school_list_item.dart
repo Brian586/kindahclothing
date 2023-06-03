@@ -3,6 +3,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/models/school.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
@@ -173,6 +174,8 @@ class _SchoolListItemState extends State<SchoolListItem> {
 
       await doc.reference.delete();
 
+      await UpdateAdminInfo().updateSchoolCount(school, false);
+
       Fluttertoast.showToast(msg: "Deleted Successfully!");
     } else {
       // Do Nothing...
@@ -321,7 +324,7 @@ class _SchoolListItemState extends State<SchoolListItem> {
                         padding: const EdgeInsets.symmetric(horizontal: 5.0),
                         child: DropdownSearch<String>(
                           popupProps: const PopupProps.menu(
-                            showSelectedItems: false,
+                            showSelectedItems: true,
                           ),
                           items: const ["School", "Madrassa"],
                           dropdownDecoratorProps: const DropDownDecoratorProps(
@@ -335,7 +338,7 @@ class _SchoolListItemState extends State<SchoolListItem> {
                               category = str!;
                             });
                           },
-                          // selectedItem: ,
+                          selectedItem: category,
                         ),
                       ),
                       const SizedBox(

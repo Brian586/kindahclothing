@@ -4,15 +4,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/common_functions/load_json.dart';
+import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/models/custom_location.dart';
 import 'package:kindah/models/school.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:provider/provider.dart';
 
 import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/uploader.dart';
 import '../../config.dart';
 import '../../models/admin.dart';
-import '../../providers/admin_provider.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
 import '../../widgets/custom_wrapper.dart';
@@ -20,7 +21,8 @@ import '../../widgets/progress_widget.dart';
 import '../widgets/custom_header.dart';
 
 class AddSchools extends StatefulWidget {
-  const AddSchools({super.key});
+  final bool isAdmin;
+  const AddSchools({super.key, required this.isAdmin});
 
   @override
   State<AddSchools> createState() => _AddSchoolsState();
@@ -60,14 +62,7 @@ class _AddSchoolsState extends State<AddSchools> {
     }
   }
 
-  Future<void> updateAdminCount(Admin admin, Map<String, dynamic> map) async {
-    await FirebaseFirestore.instance
-        .collection("admins")
-        .doc(admin.id)
-        .update(map);
-  }
-
-  void saveSchoolToFirestore(Admin admin) async {
+  void saveSchoolToFirestore() async {
     setState(() {
       loading = true;
     });
@@ -103,16 +98,7 @@ class _AddSchoolsState extends State<AddSchools> {
           .doc(school.id)
           .set(school.toMap());
 
-      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-          .collection("admins")
-          .doc(admin.id)
-          .get();
-
-      Admin updatedAdmin = Admin.fromDocument(documentSnapshot);
-
-      await updateAdminCount(admin, {
-        "schools": updatedAdmin.schools! + 1,
-      });
+      await UpdateAdminInfo().updateSchoolCount(school, true);
 
       Fluttertoast.showToast(
           msg:
@@ -168,8 +154,6 @@ class _AddSchoolsState extends State<AddSchools> {
 
   @override
   Widget build(BuildContext context) {
-    Admin admin = context.watch<AdminProvider>().admin;
-
     return loading
         ? circularProgress()
         : SingleChildScrollView(
@@ -177,9 +161,13 @@ class _AddSchoolsState extends State<AddSchools> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CustomHeader(
-                  action: [],
-                ),
+                widget.isAdmin
+                    ? const CustomHeader(
+                        action: [],
+                      )
+                    : const UserCustomHeader(
+                        action: [],
+                      ),
                 Align(
                   alignment: Alignment.topLeft,
                   child: CustomWrapper(
@@ -432,7 +420,7 @@ class _AddSchoolsState extends State<AddSchools> {
                                   logoFile != null &&
                                   uniformFile != null &&
                                   countryController.text.isNotEmpty) {
-                                saveSchoolToFirestore(admin);
+                                saveSchoolToFirestore();
                               } else {
                                 Fluttertoast.showToast(
                                     msg: "Fill in the required fields");

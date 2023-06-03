@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/admin.dart';
 import '../../models/product.dart';
 import '../../providers/admin_provider.dart';
 import '../../widgets/custom_button.dart';
@@ -13,7 +13,8 @@ import '../widgets/custom_header.dart';
 import '../widgets/product_listing_item.dart';
 
 class EditProducts extends StatefulWidget {
-  const EditProducts({super.key});
+  final bool isAdmin;
+  const EditProducts({super.key, required this.isAdmin});
 
   @override
   State<EditProducts> createState() => _EditProductsState();
@@ -22,33 +23,35 @@ class EditProducts extends StatefulWidget {
 class _EditProductsState extends State<EditProducts> {
   @override
   Widget build(BuildContext context) {
-    Admin admin = context.watch<AdminProvider>().admin;
-
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomHeader(
-            action: [
-              CustomButton(
-                title: "Add Product",
-                iconData: Icons.add,
-                height: 30.0,
-                onPressed: () {
-                  context
-                      .read<AdminProvider>()
-                      .changeDrawerItem("add_products");
+          widget.isAdmin
+              ? CustomHeader(
+                  action: [
+                    CustomButton(
+                      title: "Add Product",
+                      iconData: Icons.add,
+                      height: 30.0,
+                      onPressed: () {
+                        context
+                            .read<AdminProvider>()
+                            .changeDrawerItem("add_products");
 
-                  context.go("/admin/${admin.id}/add_products");
-                },
-              )
-            ],
-          ),
+                        context.go("/admin/0001/add_products");
+                      },
+                    )
+                  ],
+                )
+              : const UserCustomHeader(
+                  action: [],
+                ),
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection("products")
-                .where("publisher", isEqualTo: admin.id)
+                .where("publisher", isEqualTo: "0001")
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {

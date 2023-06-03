@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/models/tariff.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
@@ -13,7 +14,8 @@ import '../../widgets/custom_textfield.dart';
 import '../widgets/custom_header.dart';
 
 class MyTariffs extends StatefulWidget {
-  const MyTariffs({super.key});
+  final bool isAdmin;
+  const MyTariffs({super.key, required this.isAdmin});
 
   @override
   State<MyTariffs> createState() => _MyTariffsState();
@@ -201,24 +203,41 @@ class _MyTariffsState extends State<MyTariffs> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomHeader(
-            action: [
-              CustomButton(
-                title: "Add Tariff",
-                iconData: Icons.add,
-                height: 30.0,
-                onPressed: () {
-                  setState(() {
-                    addTariff = true;
-                  });
-                },
-              )
-            ],
-          ),
+          widget.isAdmin
+              ? CustomHeader(
+                  action: [
+                    CustomButton(
+                      title: "Add Tariff",
+                      iconData: Icons.add,
+                      height: 30.0,
+                      onPressed: () {
+                        setState(() {
+                          addTariff = true;
+                        });
+                      },
+                    )
+                  ],
+                )
+              : UserCustomHeader(
+                  action: [
+                    CustomButton(
+                      title: "Add Tariff",
+                      iconData: Icons.add,
+                      height: 30.0,
+                      onPressed: () {
+                        setState(() {
+                          addTariff = true;
+                        });
+                      },
+                    )
+                  ],
+                ),
           addTariff ? newTariff(size) : SizedBox(),
-          StreamBuilder<QuerySnapshot>(
-            stream:
-                FirebaseFirestore.instance.collection("tariffs").snapshots(),
+          FutureBuilder<QuerySnapshot>(
+            future: FirebaseFirestore.instance
+                .collection("tariffs")
+                .orderBy("timestamp", descending: true)
+                .get(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return circularProgress();

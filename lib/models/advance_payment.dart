@@ -5,8 +5,10 @@ class AdvancePayment {
   final int? timestamp;
   final double? amount;
   final String? status;
+  final Map<String, dynamic>? user;
 
-  AdvancePayment({this.id, this.timestamp, this.amount, this.status});
+  AdvancePayment(
+      {this.id, required this.user, this.timestamp, this.amount, this.status});
 
   Map<String, dynamic> toMap() {
     return {
@@ -14,6 +16,7 @@ class AdvancePayment {
       "timestamp": timestamp,
       "amount": amount!.toDouble(),
       "status": status,
+      "user": user,
     };
   }
 
@@ -22,6 +25,7 @@ class AdvancePayment {
         id: doc.id,
         timestamp: doc["timestamp"],
         amount: doc["amount"].toDouble(),
+        user: doc["user"],
         status: doc["status"]);
   }
 }

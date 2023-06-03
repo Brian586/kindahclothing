@@ -21,6 +21,7 @@ import 'package:kindah/pages/search_page.dart';
 import 'package:kindah/shop_attendant/pages/add_template.dart';
 import 'package:kindah/shop_attendant/shop_attendant.dart';
 import 'package:kindah/tailor/tailor.dart';
+import 'package:kindah/user_panel/user_panel.dart';
 
 import 'POS/pages/analytics_page.dart';
 import 'POS/pages/pos_home.dart';
@@ -128,94 +129,14 @@ class CustomRoutes {
       ),
     ),
     GoRoute(
-      path: "/users/tailors/:userID/:currentTab",
-      builder: (context, state) {
-        switch (state.params['currentTab']) {
-          case "home":
-            return Tailor(
-              userID: state.params['userID'],
-            );
-          case "settings":
-            return UserSettings(
-              userID: state.params['userID'],
-            );
-          default:
-            return Tailor(
-              userID: state.params['userID'],
-            );
-        }
-      },
-    ),
-    GoRoute(
-      path: "/users/finishers/:userID/:currentTab",
-      builder: (context, state) {
-        switch (state.params['currentTab']) {
-          case "home":
-            return Finisher(
-              userID: state.params['userID'],
-            );
-          case "settings":
-            return UserSettings(
-              userID: state.params['userID'],
-            );
-          default:
-            return Finisher(
-              userID: state.params['userID'],
-            );
-        }
-      },
-    ),
-    GoRoute(
-      path: "/users/fabric_cutters/:userID/:currentTab",
-      builder: (context, state) {
-        switch (state.params['currentTab']) {
-          case "home":
-            return FabricCutter(
-              userID: state.params['userID'],
-            );
-          case "templates?query=:templateID":
-            final query = state.queryParams['query'];
-
-            return TemplateDetails(
-              templateID: query,
-            );
-          case "settings":
-            return UserSettings(
-              userID: state.params['userID'],
-            );
-          default:
-            return FabricCutter(
-              userID: state.params['userID'],
-            );
-        }
-      },
-    ),
-    GoRoute(
-      path: "/users/shop_attendants/:userID/:currentTab",
-      builder: (context, state) {
-        switch (state.params['currentTab']) {
-          case "home":
-            return ShopAttendant(
-              userID: state.params['userID'],
-            );
-          case "add_template":
-            return AddTemplate(
-              userID: state.params['userID'],
-            );
-          case "settings":
-            return UserSettings(
-              userID: state.params['userID'],
-            );
-          // case "edit_template/:templateID":
-          //   return EditTemplate(
-          //     templateID: state.params['templateID'],
-          //   );
-          default:
-            return ShopAttendant(
-              userID: state.params['userID'],
-            );
-        }
-      },
+      path: "/users/:userRole/:userID/:currentTab",
+      builder: (context, state) => UserPanel(
+        userID: state.params['userID'],
+        userRole: state.params['userRole'],
+        currentTab: state.params['currentTab'] == "home"
+            ? "dashboard"
+            : state.params['currentTab'],
+      ),
     )
   ]);
 }

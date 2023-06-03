@@ -12,7 +12,9 @@ import 'package:kindah/widgets/uniform_data_layout.dart';
 import 'package:provider/provider.dart';
 import 'package:kindah/models/order.dart' as template;
 
+import '../../common_functions/update_done_orders.dart';
 import '../../models/account.dart';
+import '../../models/user_payment.dart';
 import '../../providers/account_provider.dart';
 
 class TemplateDetails extends StatefulWidget {
@@ -53,6 +55,9 @@ class _TemplateDetailsState extends State<TemplateDetails> {
           .update({
         "processed": processedCount + 1,
       });
+
+      // UPDATE DONE ORDER=========================================
+      await UpdateDoneOrders.updatePendingOrders(account, widget.templateID!);
 
       setState(() {
         isProcessing = false;
@@ -200,21 +205,6 @@ class _TemplateDetailsState extends State<TemplateDetails> {
                     ],
                   ),
                 ),
-                // RichText(
-                //   textAlign: TextAlign.start,
-                //   text: TextSpan(
-                //     children: <TextSpan>[
-                //       const TextSpan(
-                //           text: "School: ",
-                //           style: TextStyle(color: Config.customGrey)),
-                //       TextSpan(
-                //           text: order.school!["name"],
-                //           style: const TextStyle(
-                //               fontWeight: FontWeight.w600,
-                //               color: Config.customGrey)),
-                //     ],
-                //   ),
-                // ),
                 RichText(
                   textAlign: TextAlign.start,
                   text: TextSpan(

@@ -157,7 +157,7 @@ class _AuthPageState extends State<AuthPage> {
             await FirebaseAuth.instance.signInWithCredential(credential);
 
             GoRouter.of(context)
-                .go("/users/${account.userRole}s/${account.id}/home");
+                .go("/users/${account.userRole}s/${account.id}/dashboard");
 
             setState(() {
               loading = false;
@@ -192,7 +192,7 @@ class _AuthPageState extends State<AuthPage> {
               await FirebaseAuth.instance.signInWithCredential(credential);
 
               GoRouter.of(context)
-                  .go("/users/${account.userRole}s/${account.id}/home");
+                  .go("/users/${account.userRole}s/${account.id}/dashboard");
 
               setState(() {
                 loading = false;
@@ -237,7 +237,7 @@ class _AuthPageState extends State<AuthPage> {
         backgroundColor: Colors.transparent,
         leading: IconButton(
           padding: EdgeInsets.zero,
-          onPressed: () => GoRouter.of(context).go("/home"),
+          onPressed: () => GoRouter.of(context).go("/dashboard"),
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
             color: Config.customGrey,

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/admin.dart';
@@ -13,7 +14,8 @@ import '../widgets/custom_header.dart';
 import '../widgets/school_list_item.dart';
 
 class EditSchools extends StatefulWidget {
-  const EditSchools({super.key});
+  final bool isAdmin;
+  const EditSchools({super.key, required this.isAdmin});
 
   @override
   State<EditSchools> createState() => _EditSchoolsState();
@@ -22,27 +24,31 @@ class EditSchools extends StatefulWidget {
 class _EditSchoolsState extends State<EditSchools> {
   @override
   Widget build(BuildContext context) {
-    Admin admin = context.watch<AdminProvider>().admin;
-
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CustomHeader(
-            action: [
-              CustomButton(
-                title: "Add School",
-                iconData: Icons.add,
-                height: 30.0,
-                onPressed: () {
-                  context.read<AdminProvider>().changeDrawerItem("add_schools");
+          widget.isAdmin
+              ? CustomHeader(
+                  action: [
+                    CustomButton(
+                      title: "Add School",
+                      iconData: Icons.add,
+                      height: 30.0,
+                      onPressed: () {
+                        context
+                            .read<AdminProvider>()
+                            .changeDrawerItem("add_schools");
 
-                  context.go("/admin/${admin.id}/add_schools");
-                },
-              )
-            ],
-          ),
+                        context.go("/admin/0001/add_schools");
+                      },
+                    )
+                  ],
+                )
+              : const UserCustomHeader(
+                  action: [],
+                ),
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection("schools")

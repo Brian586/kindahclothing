@@ -91,7 +91,7 @@ class _OrderDesignState extends State<OrderDesign> {
       case "finished":
         return const CustomTag(
           title: "Completed",
-          color: Colors.red,
+          color: Colors.green,
         );
       default:
         return const SizedBox(

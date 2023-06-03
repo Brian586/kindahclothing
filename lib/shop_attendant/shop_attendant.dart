@@ -9,33 +9,24 @@ import 'package:kindah/providers/account_provider.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/no_data.dart';
 import 'package:kindah/widgets/order_design.dart';
-import 'package:kindah/widgets/user_appbar.dart';
 import 'package:provider/provider.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 import 'package:kindah/models/order.dart' as template;
 
 import '../Ads/ad_state.dart';
-import '../pages/user_intro.dart';
+import '../user_panel/widgets/user_custom_header.dart';
 import '../widgets/progress_widget.dart';
 
 class ShopAttendant extends StatefulWidget {
-  final String? userID;
-  const ShopAttendant({super.key, this.userID});
+  const ShopAttendant({
+    super.key,
+  });
 
   @override
   State<ShopAttendant> createState() => _ShopAttendantState();
 }
 
 class _ShopAttendantState extends State<ShopAttendant> {
-  bool loading = false;
   BannerAd? bannerAd;
-
-  @override
-  void initState() {
-    super.initState();
-
-    getAccountInfo();
-  }
 
   @override
   void didChangeDependencies() {
@@ -56,291 +47,219 @@ class _ShopAttendantState extends State<ShopAttendant> {
     }
   }
 
-  void getAccountInfo() async {
-    setState(() {
-      loading = true;
-    });
-
-    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
-        .collection("users")
-        .doc(widget.userID)
-        .get();
-
-    Account account = Account.fromDocument(documentSnapshot);
-
-    if (account.isNew!) {
-      await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const UserIntro(
-                    userType: "shop_attendant",
-                  )));
-
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(widget.userID)
-          .update({"isNew": false});
-    }
-
-    Provider.of<AccountProvider>(context, listen: false).changeAccount(account);
-
-    setState(() {
-      loading = false;
-    });
-  }
-
-  Widget buildBody(BuildContext context, Account account) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: CustomWrapper(
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              InkWell(
-                onTap: () => context.go(
-                    "/users/${account.userRole}s/${account.id}/add_template"),
-                child: Card(
-                  color: Config.customBlue,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0)),
-                  child: SizedBox(
-                    height: 150.0,
-                    width: double.infinity,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(
-                                  Icons.add_rounded,
-                                  color: Colors.white,
-                                  size: 20.0,
-                                ),
-                                const SizedBox(
-                                  height: 5.0,
-                                ),
-                                Text(
-                                  "Add New Template",
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium!
-                                      .apply(color: Colors.white),
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        Image.asset(
-                          "assets/images/order.png",
-                          height: 150.0,
-                          width: 120.0,
-                          fit: BoxFit.contain,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Text(
-                      "Recent Templates",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Config.customGrey),
-                    ),
-                    SizedBox()
-                  ],
-                ),
-              ),
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection("orders")
-                    .where("publisher", isEqualTo: account.id)
-                    // .where("processedStatus", isNotEqualTo: "finished")
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return circularProgress();
-                  } else {
-                    List<template.Order> orders = [];
-
-                    snapshot.data!.docs.forEach((element) {
-                      template.Order order =
-                          template.Order.fromDocument(element);
-
-                      orders.add(order);
-                    });
-
-                    if (orders.isEmpty) {
-                      return const NoData(
-                        title: "No Available Templates",
-                      );
-                    } else {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(orders.length, (index) {
-                          template.Order order = orders[index];
-                          bool isFinished = order.processedStatus == "finished";
-
-                          return OrderDesign(
-                            order: order,
-                            isFinished: isFinished,
-                          );
-                        }),
-                      );
-                    }
-                  }
-                },
-              ),
-              kIsWeb
-                  ? const SizedBox(
-                      height: 0.0,
-                    )
-                  : bannerAd != null
-                      ? SizedBox(
-                          height: 50.0,
-                          child: AdWidget(ad: bannerAd!),
-                        )
-                      : const SizedBox(
-                          height: 0.0,
-                        ),
-              StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection("orders")
-                    .where("processedStatus", isEqualTo: "finished")
-                    .where("shopAttendant.id", isEqualTo: account.id)
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return circularProgress();
-                  } else {
-                    List<template.Order> orders = [];
-
-                    snapshot.data!.docs.forEach((element) {
-                      template.Order order =
-                          template.Order.fromDocument(element);
-
-                      orders.add(order);
-                    });
-
-                    if (orders.isEmpty) {
-                      return Container();
-                    } else {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text(
-                                  "Orders Ready To Be Dispatched",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Config.customGrey),
-                                ),
-                                SizedBox()
-                              ],
-                            ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(orders.length, (index) {
-                              template.Order order = orders[index];
-
-                              return OrderDesign(
-                                order: order,
-                                isFinished: true,
-                              );
-                            }),
-                          ),
-                        ],
-                      );
-                    }
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildDesktop(BuildContext context, Account account) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 1,
-          child: Container(),
-        ),
-        Expanded(
-          flex: 4,
-          child: Align(
-              alignment: Alignment.topLeft, child: buildBody(context, account)),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     Account account = context.watch<AccountProvider>().account;
 
-    return loading
-        ? Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: Center(
-              child: circularProgress(),
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const UserCustomHeader(
+            action: [],
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: CustomWrapper(
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        context
+                            .read<AccountProvider>()
+                            .changeDrawerItem("add_order");
+                        context.go(
+                            "/users/${account.userRole}s/${account.id}/add_order");
+                      },
+                      child: Card(
+                        color: Config.customBlue,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0)),
+                        child: SizedBox(
+                          height: 150.0,
+                          width: double.infinity,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(
+                                        Icons.add_rounded,
+                                        color: Colors.white,
+                                        size: 20.0,
+                                      ),
+                                      const SizedBox(
+                                        height: 5.0,
+                                      ),
+                                      Text(
+                                        "Add New Template",
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium!
+                                            .apply(color: Colors.white),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Image.asset(
+                                "assets/images/order.png",
+                                height: 150.0,
+                                width: 120.0,
+                                fit: BoxFit.contain,
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Text(
+                            "Recent Templates",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Config.customGrey),
+                          ),
+                          SizedBox()
+                        ],
+                      ),
+                    ),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection("orders")
+                          .where("publisher", isEqualTo: account.id)
+                          // .where("processedStatus", isNotEqualTo: "finished")
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return circularProgress();
+                        } else {
+                          List<template.Order> orders = [];
+
+                          snapshot.data!.docs.forEach((element) {
+                            template.Order order =
+                                template.Order.fromDocument(element);
+
+                            orders.add(order);
+                          });
+
+                          if (orders.isEmpty) {
+                            return const NoData(
+                              title: "No Available Templates",
+                            );
+                          } else {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(orders.length, (index) {
+                                template.Order order = orders[index];
+                                bool isFinished =
+                                    order.processedStatus == "finished";
+
+                                return OrderDesign(
+                                  order: order,
+                                  isFinished: isFinished,
+                                );
+                              }),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                    kIsWeb
+                        ? const SizedBox(
+                            height: 0.0,
+                          )
+                        : bannerAd != null
+                            ? SizedBox(
+                                height: 50.0,
+                                child: AdWidget(ad: bannerAd!),
+                              )
+                            : const SizedBox(
+                                height: 0.0,
+                              ),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection("orders")
+                          .where("processedStatus", isEqualTo: "finished")
+                          .where("shopAttendant.id", isEqualTo: account.id)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return circularProgress();
+                        } else {
+                          List<template.Order> orders = [];
+
+                          snapshot.data!.docs.forEach((element) {
+                            template.Order order =
+                                template.Order.fromDocument(element);
+
+                            orders.add(order);
+                          });
+
+                          if (orders.isEmpty) {
+                            return Container();
+                          } else {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: const [
+                                      Text(
+                                        "Orders Ready To Be Dispatched",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: Config.customGrey),
+                                      ),
+                                      SizedBox()
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children:
+                                      List.generate(orders.length, (index) {
+                                    template.Order order = orders[index];
+
+                                    return OrderDesign(
+                                      order: order,
+                                      isFinished: true,
+                                    );
+                                  }),
+                                ),
+                              ],
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
           )
-        : ResponsiveBuilder(
-            builder: (context, sizingInformation) {
-              bool isMobile = sizingInformation.isMobile;
-
-              return Scaffold(
-                appBar: PreferredSize(
-                  preferredSize: Size(size.width, kToolbarHeight),
-                  child: UserAppbar(
-                    isMobile: isMobile,
-                    leading: null,
-                    title: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Welcome, ${account.username}",
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                        const Text(
-                          "Shop Attendant",
-                          style:
-                              TextStyle(fontSize: 13.0, color: Colors.white60),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                body: isMobile
-                    ? buildBody(context, account)
-                    : buildDesktop(context, account),
-              );
-            },
-          );
+        ],
+      ),
+    );
   }
 }
