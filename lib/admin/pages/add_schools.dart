@@ -8,12 +8,10 @@ import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/models/custom_location.dart';
 import 'package:kindah/models/school.dart';
 import 'package:kindah/user_panel/widgets/user_custom_header.dart';
-import 'package:provider/provider.dart';
 
 import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/uploader.dart';
 import '../../config.dart';
-import '../../models/admin.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_textfield.dart';

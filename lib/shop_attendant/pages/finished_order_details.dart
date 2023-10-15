@@ -1,16 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:kindah/widgets/custom_button.dart';
-import 'package:provider/provider.dart';
 import 'package:kindah/models/order.dart' as template;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../config.dart';
-import '../../models/account.dart';
 import '../../models/uniform.dart';
-import '../../providers/account_provider.dart';
 import '../../widgets/adaptive_ui.dart';
 import '../../widgets/progress_widget.dart';
 import '../../widgets/uniform_data_layout.dart';
@@ -29,7 +24,7 @@ class _FinishedOrderDetailsState extends State<FinishedOrderDetails> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    Account account = context.watch<AccountProvider>().account;
+    // Account account = context.watch<AccountProvider>().account;
 
     return AdaptiveUI(
       appbarLeading: IconButton(

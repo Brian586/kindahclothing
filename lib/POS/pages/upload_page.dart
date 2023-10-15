@@ -13,7 +13,6 @@ import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/uploader.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
-import '../../widgets/custom_wrapper.dart';
 import '../../widgets/ecomm_appbar.dart';
 import '../../widgets/progress_widget.dart';
 import '../models/pos_product.dart';

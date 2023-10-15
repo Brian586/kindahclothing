@@ -51,7 +51,6 @@ class _ShopAttendantState extends State<ShopAttendant> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     Account account = context.watch<AccountProvider>().account;
     String preferedRole = context.watch<AccountProvider>().preferedRole;
 

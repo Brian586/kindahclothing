@@ -10,7 +10,6 @@ import '../../common_functions/update_done_orders.dart';
 import '../../config.dart';
 import '../../models/account.dart';
 import '../../models/uniform.dart';
-import '../../models/user_payment.dart';
 import '../../providers/account_provider.dart';
 import '../../widgets/adaptive_ui.dart';
 import '../../widgets/progress_widget.dart';

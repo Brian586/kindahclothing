@@ -1,14 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindah/POS/models/pos_user.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:uuid/uuid.dart';
 import '../../../widgets/progress_widget.dart';
 
-import '../../../pages/otp_screen.dart';
 import '../../responsive.dart';
 import '../../../config.dart';
 

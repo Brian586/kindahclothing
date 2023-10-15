@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/APIs/m_pesa.dart';
 import 'package:kindah/APIs/paypal.dart';
 import 'package:kindah/config.dart';
-import 'package:kindah/pages/NFC/nfc_receiver.dart';
 import 'package:kindah/widgets/count_down_timer.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:kindah/widgets/custom_popup.dart';

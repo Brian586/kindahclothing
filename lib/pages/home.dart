@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:kindah/APIs/request_assistant.dart';
 import 'package:kindah/Ads/ad_state.dart';
 import 'package:kindah/models/product.dart';
 import 'package:kindah/widgets/ecomm_appbar.dart';

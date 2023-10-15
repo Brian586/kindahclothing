@@ -14,7 +14,6 @@ import 'package:kindah/models/order.dart' as template;
 
 import '../../common_functions/update_done_orders.dart';
 import '../../models/account.dart';
-import '../../models/user_payment.dart';
 import '../../providers/account_provider.dart';
 
 class TemplateDetails extends StatefulWidget {

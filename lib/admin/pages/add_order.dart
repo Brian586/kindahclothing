@@ -214,7 +214,6 @@ class _AddOrderState extends State<AddOrder> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     double totalAmount = context.watch<UniformProvider>().totalAmount;
     List<Uniform> chosenUniforms =
         context.watch<UniformProvider>().chosenUniforms;

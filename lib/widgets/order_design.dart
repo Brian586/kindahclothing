@@ -11,7 +11,6 @@ import 'package:provider/provider.dart';
 
 import '../config.dart';
 import '../finisher/pages/finisher_order_details.dart';
-import '../models/account.dart';
 import '../providers/account_provider.dart';
 import 'custom_tag.dart';
 
@@ -103,7 +102,7 @@ class _OrderDesignState extends State<OrderDesign> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    Account account = context.watch<AccountProvider>().account;
+    // Account account = context.watch<AccountProvider>().account;
     String preferedRole = context.watch<AccountProvider>().preferedRole;
 
     return Card(

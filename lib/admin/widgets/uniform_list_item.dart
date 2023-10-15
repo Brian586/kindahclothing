@@ -12,7 +12,6 @@ import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/update_admin_info.dart';
 import '../../common_functions/uploader.dart';
 import '../../config.dart';
-import '../../models/admin.dart';
 import '../../widgets/custom_popup.dart';
 import '../../widgets/custom_textfield.dart';
 

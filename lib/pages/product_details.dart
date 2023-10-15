@@ -20,7 +20,7 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails> {
   CarouselController _carouselController = CarouselController();
-  int _currentIndex = 0;
+  int currentIndex = 0;
   TextEditingController quantityController = TextEditingController();
   int quantityValue = 1;
 
@@ -32,7 +32,7 @@ class _ProductDetailsState extends State<ProductDetails> {
 
   void onPageChanged(index, reason) {
     setState(() {
-      _currentIndex = index;
+      currentIndex = index;
     });
   }
 

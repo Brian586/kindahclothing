@@ -369,8 +369,6 @@ class _UserListItemState extends State<UserListItem> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
     return Card(
       child: ExpansionTile(
         leading: CircleAvatar(

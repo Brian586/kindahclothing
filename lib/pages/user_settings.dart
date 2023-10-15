@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindah/models/user_request.dart';
-import 'package:kindah/widgets/adaptive_ui.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 

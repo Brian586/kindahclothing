@@ -18,7 +18,6 @@ import '../../widgets/custom_wrapper.dart';
 import '../../widgets/progress_widget.dart';
 import '../../widgets/uniform_data_layout.dart';
 import '../../widgets/user_appbar.dart';
-import '../widgets/uniform_design.dart';
 
 class EditTemplate extends StatefulWidget {
   final String? templateID;

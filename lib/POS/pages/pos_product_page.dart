@@ -9,7 +9,6 @@ import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/category_provider.dart';
-import '../../APIs/request_assistant.dart';
 import '../../widgets/no_data.dart';
 import '../widgets/pos_category_button.dart';
 

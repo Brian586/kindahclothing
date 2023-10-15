@@ -6,12 +6,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/admin/widgets/custom_header.dart';
 import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/common_functions/uploader.dart';
-import 'package:kindah/models/admin.dart';
 import 'package:kindah/models/product.dart';
-import 'package:kindah/providers/admin_provider.dart';
 import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/progress_widget.dart';
-import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../common_functions/custom_file_picker.dart';

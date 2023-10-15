@@ -135,8 +135,6 @@ class _POSHomeState extends State<POSHome> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
     return ResponsiveBuilder(
       builder: (context, sizingInformation) {
         bool isMobile = sizingInformation.isMobile;
