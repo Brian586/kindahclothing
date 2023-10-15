@@ -19,6 +19,7 @@ class _ChooseTailorState extends State<ChooseTailor> {
   void showPrompt(BuildContext context, Account tailor) {
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (ctx) {
           return CustomPopup(
             title: "Assign Template",

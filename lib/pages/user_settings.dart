@@ -7,6 +7,7 @@ import 'package:kindah/widgets/adaptive_ui.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../common_functions/user_role_solver.dart';
 import '../config.dart';
 import '../models/account.dart';
 import '../providers/account_provider.dart';
@@ -37,6 +38,7 @@ class _UserSettingsState extends State<UserSettings> {
   void makeRequest(Account account) async {
     String result = await showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
         return CustomPopup(
           title: "Make Request",
@@ -95,30 +97,16 @@ class _UserSettingsState extends State<UserSettings> {
     }
   }
 
-  String getUserRole(Account account) {
-    switch (account.userRole) {
-      case "shop_attendant":
-        return "Shop Attendant";
-      case "fabric_cutter":
-        return "Fabric Cutter";
-      case "tailor":
-        return "Tailor";
-      case "finisher":
-        return "Finisher";
-      default:
-        return account.userRole!;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Account account = context.watch<AccountProvider>().account;
+    String preferedRole = context.watch<AccountProvider>().preferedRole;
 
     nameController.text = account.username!;
     emailController.text = account.email!;
     phoneController.text = account.phone!;
     idController.text = account.idNumber!;
-    userRoleController.text = getUserRole(account);
+    userRoleController.text = toHumanReadable(preferedRole);
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -230,7 +218,7 @@ class _UserSettingsState extends State<UserSettings> {
                             height: 50.0,
                           ),
                           TextButton.icon(
-                            onPressed: () => context.go("/home"),
+                            onPressed: () => context.go("/"),
                             icon: const Icon(
                               Icons.logout_rounded,
                               color: Colors.red,

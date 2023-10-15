@@ -6,6 +6,7 @@ import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
 import '../../POS/widgets/pos_custom_header.dart';
+import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_wrapper.dart';
 import '../../widgets/no_data.dart';
 import '../widgets/custom_header.dart';
@@ -20,6 +21,8 @@ class Inventory extends StatefulWidget {
 }
 
 class _InventoryState extends State<Inventory> {
+  final ScrollController _controller = ScrollController();
+
   Widget buildOrderListing(String type) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -61,99 +64,103 @@ class _InventoryState extends State<Inventory> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          widget.isAdmin
-              ? const CustomHeader(
-                  action: [],
-                )
-              : const UserCustomHeader(
-                  action: [],
-                ),
-          StreamBuilder<DocumentSnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection("order_count")
-                .doc("product_order_count")
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return circularProgress();
-              } else {
-                int pending = snapshot.data!["pending"];
-                int delivered = snapshot.data!["delivered"];
-                int shipping = snapshot.data!["shipping"];
-
-                return Align(
-                  alignment: Alignment.centerLeft,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const SizedBox(
-                          width: 20.0,
-                        ),
-                        DashCard(
-                          backgroundColor: Colors.pink.shade800,
-                          imageUrl: "assets/images/order.png",
-                          pathTo: "",
-                          count: pending,
-                          title: "Pending Approval",
-                        ),
-                        DashCard(
-                          backgroundColor: Colors.blue.shade700,
-                          imageUrl: "assets/images/shipping.png",
-                          pathTo: "",
-                          count: shipping,
-                          title: "Shipping",
-                        ),
-                        DashCard(
-                          backgroundColor: Colors.purple.shade600,
-                          imageUrl: "assets/images/delivered.png",
-                          pathTo: "",
-                          count: delivered,
-                          title: "Delivered",
-                        )
-                      ],
-                    ),
-                  ),
-                );
-              }
-            },
-          ),
-          Align(
-            alignment: Alignment.topLeft,
-            child: CustomWrapper(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const POSCustomHeader(
+    return CustomScrollBar(
+      controller: _controller,
+      child: SingleChildScrollView(
+        controller: _controller,
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            widget.isAdmin
+                ? const CustomHeader(
                     action: [],
-                    title: "Pending Approval",
-                  ),
-                  buildOrderListing("pending"),
-                  const POSCustomHeader(
-                    action: [],
-                    title: "Shipping",
-                  ),
-                  buildOrderListing("shipping"),
-                  const POSCustomHeader(
-                    action: [],
-                    title: "Delivered",
-                  ),
-                  buildOrderListing("delivered"),
-                  const SizedBox(
-                    height: 50.0,
                   )
-                ],
-              ),
+                : const UserCustomHeader(
+                    action: [],
+                  ),
+            StreamBuilder<DocumentSnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection("order_count")
+                  .doc("product_order_count")
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return circularProgress();
+                } else {
+                  int pending = snapshot.data!["pending"];
+                  int delivered = snapshot.data!["delivered"];
+                  int shipping = snapshot.data!["shipping"];
+
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const SizedBox(
+                            width: 20.0,
+                          ),
+                          DashCard(
+                            backgroundColor: Colors.pink.shade800,
+                            imageUrl: "assets/images/order.png",
+                            pathTo: "",
+                            count: pending,
+                            title: "Pending Approval",
+                          ),
+                          DashCard(
+                            backgroundColor: Colors.blue.shade700,
+                            imageUrl: "assets/images/shipping.png",
+                            pathTo: "",
+                            count: shipping,
+                            title: "Shipping",
+                          ),
+                          DashCard(
+                            backgroundColor: Colors.purple.shade600,
+                            imageUrl: "assets/images/delivered.png",
+                            pathTo: "",
+                            count: delivered,
+                            title: "Delivered",
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }
+              },
             ),
-          )
-        ],
+            Align(
+              alignment: Alignment.topLeft,
+              child: CustomWrapper(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const POSCustomHeader(
+                      action: [],
+                      title: "Pending Approval",
+                    ),
+                    buildOrderListing("pending"),
+                    const POSCustomHeader(
+                      action: [],
+                      title: "Shipping",
+                    ),
+                    buildOrderListing("shipping"),
+                    const POSCustomHeader(
+                      action: [],
+                      title: "Delivered",
+                    ),
+                    buildOrderListing("delivered"),
+                    const SizedBox(
+                      height: 50.0,
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

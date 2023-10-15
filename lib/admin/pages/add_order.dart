@@ -18,6 +18,7 @@ import '../../pages/payment_successful.dart';
 import '../../providers/uniform_provider.dart';
 import '../../shop_attendant/widgets/uniform_design.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_textfield.dart';
 import '../widgets/custom_header.dart';
 
@@ -30,6 +31,7 @@ class AddOrder extends StatefulWidget {
 }
 
 class _AddOrderState extends State<AddOrder> {
+  final ScrollController _controller = ScrollController();
   TextEditingController schoolController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController secondNameController = TextEditingController();
@@ -217,193 +219,199 @@ class _AddOrderState extends State<AddOrder> {
     List<Uniform> chosenUniforms =
         context.watch<UniformProvider>().chosenUniforms;
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          widget.isAdmin
-              ? const CustomHeader(
-                  action: [],
-                )
-              : const UserCustomHeader(
-                  action: [],
-                ),
-          loading
-              ? circularProgress()
-              : Align(
-                  alignment: Alignment.topLeft,
-                  child: CustomWrapper(
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          customTitle("Client Information"),
-                          CustomTextField(
-                            controller: nameController,
-                            hintText: "Name",
-                            title: "Client's First Name",
-                            inputType: TextInputType.name,
-                          ),
-                          CustomTextField(
-                            controller: secondNameController,
-                            hintText: "Second Name",
-                            title: "Second Name",
-                            inputType: TextInputType.name,
-                          ),
-                          CustomTextField(
-                            controller: surnameController,
-                            hintText: "Surname",
-                            title: "Surname",
-                            inputType: TextInputType.name,
-                          ),
-                          CustomTextField(
-                            controller: classController,
-                            hintText: "Class",
-                            title: "Class of Student",
-                            inputType: TextInputType.number,
-                          ),
-                          DropdownSearch<School>(
-                            asyncItems: (String? filter) => getSchools(filter!),
-                            clearButtonProps:
-                                const ClearButtonProps(isVisible: true),
-                            popupProps: PopupProps.menu(
-                              //showSelectedItems: true,
-                              itemBuilder: _customPopupItemBuilder,
-                              showSearchBox: true,
-                              searchFieldProps: TextFieldProps(
-                                controller: schoolController,
-                                decoration: InputDecoration(
-                                  suffixIcon: IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () {
-                                      schoolController.clear();
-                                    },
+    return CustomScrollBar(
+      controller: _controller,
+      child: SingleChildScrollView(
+        controller: _controller,
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            widget.isAdmin
+                ? const CustomHeader(
+                    action: [],
+                  )
+                : const UserCustomHeader(
+                    action: [],
+                  ),
+            loading
+                ? circularProgress()
+                : Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomWrapper(
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            customTitle("Client Information"),
+                            CustomTextField(
+                              controller: nameController,
+                              hintText: "Name",
+                              title: "Client's First Name",
+                              inputType: TextInputType.name,
+                            ),
+                            CustomTextField(
+                              controller: secondNameController,
+                              hintText: "Second Name",
+                              title: "Second Name",
+                              inputType: TextInputType.name,
+                            ),
+                            CustomTextField(
+                              controller: surnameController,
+                              hintText: "Surname",
+                              title: "Surname",
+                              inputType: TextInputType.name,
+                            ),
+                            CustomTextField(
+                              controller: classController,
+                              hintText: "Class",
+                              title: "Class of Student",
+                              inputType: TextInputType.number,
+                            ),
+                            DropdownSearch<School>(
+                              asyncItems: (String? filter) =>
+                                  getSchools(filter!),
+                              clearButtonProps:
+                                  const ClearButtonProps(isVisible: true),
+                              popupProps: PopupProps.menu(
+                                //showSelectedItems: true,
+                                itemBuilder: _customPopupItemBuilder,
+                                showSearchBox: true,
+                                searchFieldProps: TextFieldProps(
+                                  controller: schoolController,
+                                  decoration: InputDecoration(
+                                    suffixIcon: IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        schoolController.clear();
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedSchool = value!;
-                              });
-                            },
-                            itemAsString: (item) => item.name!,
-                            // compareFn: (item, selectedItem) =>
-                            //     item.id == selectedItem.id,
-                            dropdownDecoratorProps: DropDownDecoratorProps(
-                              dropdownSearchDecoration: InputDecoration(
-                                labelText: 'Choose School *',
-                                filled: true,
-                                fillColor: Theme.of(context)
-                                    .inputDecorationTheme
-                                    .fillColor, //gsutil cors set cors.json gs://kindahclothing
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedSchool = value!;
+                                });
+                              },
+                              itemAsString: (item) => item.name!,
+                              // compareFn: (item, selectedItem) =>
+                              //     item.id == selectedItem.id,
+                              dropdownDecoratorProps: DropDownDecoratorProps(
+                                dropdownSearchDecoration: InputDecoration(
+                                  labelText: 'Choose School *',
+                                  filled: true,
+                                  fillColor: Theme.of(context)
+                                      .inputDecorationTheme
+                                      .fillColor, //gsutil cors set cors.json gs://kindahclothing
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(
-                            height: 20.0,
-                          ),
-                          customTitle("Select Gender"),
-                          CheckboxListTile(
-                            controlAffinity: ListTileControlAffinity.leading,
-                            title: const Text('Male'),
-                            value: isMale,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isMale = value!;
-                              });
-                            },
-                          ),
-                          CheckboxListTile(
-                            controlAffinity: ListTileControlAffinity.leading,
-                            title: const Text('Female'),
-                            value: !isMale,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                isMale = !value!;
-                              });
-                            },
-                          ),
-                          const SizedBox(
-                            height: 20.0,
-                          ),
-                          customTitle("Uniforms"),
-                          StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection("uniforms")
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return circularProgress();
-                              } else {
-                                List<Uniform> uniforms = [];
-
-                                snapshot.data!.docs.forEach((element) {
-                                  Uniform uniform =
-                                      Uniform.fromDocument(element);
-
-                                  uniforms.add(uniform);
+                            const SizedBox(
+                              height: 20.0,
+                            ),
+                            customTitle("Select Gender"),
+                            CheckboxListTile(
+                              controlAffinity: ListTileControlAffinity.leading,
+                              title: const Text('Male'),
+                              value: isMale,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  isMale = value!;
                                 });
+                              },
+                            ),
+                            CheckboxListTile(
+                              controlAffinity: ListTileControlAffinity.leading,
+                              title: const Text('Female'),
+                              value: !isMale,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  isMale = !value!;
+                                });
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20.0,
+                            ),
+                            customTitle("Uniforms"),
+                            StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection("uniforms")
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return circularProgress();
+                                } else {
+                                  List<Uniform> uniforms = [];
 
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children:
-                                      List.generate(uniforms.length, (index) {
-                                    Uniform uniform = uniforms[index];
+                                  snapshot.data!.docs.forEach((element) {
+                                    Uniform uniform =
+                                        Uniform.fromDocument(element);
 
-                                    return UniformDesign(
-                                      uniform: uniform,
-                                      selectedUniforms: selectedUniforms,
-                                    );
-                                  }),
-                                );
-                              }
-                            },
-                          ),
-                          const SizedBox(
-                            height: 20.0,
-                          ),
-                          Text(
-                            "Total Amount: \nKsh $totalAmount",
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                color: Colors.pink,
-                                fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(
-                            height: 20.0,
-                          ),
-                          CustomButton(
-                            onPressed: () {
-                              if (totalAmount > 0.0 &&
-                                  nameController.text.isNotEmpty &&
-                                  secondNameController.text.isNotEmpty &&
-                                  surnameController.text.isNotEmpty &&
-                                  classController.text.isNotEmpty &&
-                                  selectedSchool != null) {
-                                // Proceed to pay
-                                authorizePayment(
-                                    context, chosenUniforms, totalAmount);
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg: "Fill the required fields");
-                              }
-                            },
-                            title: "Upload Template",
-                            iconData: Icons.done_rounded,
-                          ),
-                          const SizedBox(
-                            height: 30.0,
-                          ),
-                        ],
+                                    uniforms.add(uniform);
+                                  });
+
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children:
+                                        List.generate(uniforms.length, (index) {
+                                      Uniform uniform = uniforms[index];
+
+                                      return UniformDesign(
+                                        uniform: uniform,
+                                        selectedUniforms: selectedUniforms,
+                                      );
+                                    }),
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20.0,
+                            ),
+                            Text(
+                              "Total Amount: \nKsh $totalAmount",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.pink,
+                                  fontWeight: FontWeight.w800),
+                            ),
+                            const SizedBox(
+                              height: 20.0,
+                            ),
+                            CustomButton(
+                              onPressed: () {
+                                if (totalAmount > 0.0 &&
+                                    nameController.text.isNotEmpty &&
+                                    secondNameController.text.isNotEmpty &&
+                                    surnameController.text.isNotEmpty &&
+                                    classController.text.isNotEmpty &&
+                                    selectedSchool != null) {
+                                  // Proceed to pay
+                                  authorizePayment(
+                                      context, chosenUniforms, totalAmount);
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Fill the required fields");
+                                }
+                              },
+                              title: "Upload Template",
+                              iconData: Icons.done_rounded,
+                            ),
+                            const SizedBox(
+                              height: 30.0,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                )
-        ],
+                  )
+          ],
+        ),
       ),
     );
   }

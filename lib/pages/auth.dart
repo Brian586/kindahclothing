@@ -4,14 +4,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/models/account.dart';
-import 'package:kindah/pages/otp_screen.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:kindah/widgets/custom_textfield.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-import '../models/admin.dart';
+import '../common_functions/phone_validator.dart';
+import '../common_functions/user_role_solver.dart';
+import '../widgets/custom_popup.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -21,111 +21,52 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  TextEditingController phoneController = TextEditingController();
   TextEditingController idController = TextEditingController();
-  TextEditingController adminUsernameController = TextEditingController();
-  TextEditingController adminPasswordController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
   bool loading = false;
+  String phoneNumber = "";
 
-  void adminSignIn(BuildContext context) async {
-    setState(() {
-      loading = true;
-    });
+  Future<String> setUserRole(Account account) async {
+    // Prompt user to pick a role //
 
-    QuerySnapshot adminResults = await FirebaseFirestore.instance
-        .collection("admins")
-        .where("username", isEqualTo: adminUsernameController.text.trim())
-        .where("password", isEqualTo: adminPasswordController.text.trim())
-        .get();
-
-    if (adminResults.docs.isNotEmpty) {
-      // Proceed to Admin Panel
-
-      Admin admin = Admin.fromDocument(adminResults.docs[0]);
-
-      //context.read<AdminProvider>().changeAdmin(admin);
-
-      Fluttertoast.showToast(msg: "Welcome ${adminUsernameController.text}");
-
-      // setState(() {
-      //   loading = false;
-      // });
-
-      GoRouter.of(context).go("/admin/${admin.id}/dashboard");
-    } else {
-      // Cancel authentication
-
-      Fluttertoast.showToast(msg: "Admin does NOT EXIST");
-
-      setState(() {
-        loading = false;
-      });
-    }
-  }
-
-  void promptAdminLogin(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text(
-            "Admin Sign In",
-            style: TextStyle(
-                color: Config.customGrey, fontWeight: FontWeight.w800),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CustomTextField(
-                controller: adminUsernameController,
-                hintText: "Username",
-                title: "Username",
-                inputType: TextInputType.name,
-              ),
-              CustomTextField(
-                controller: adminPasswordController,
-                hintText: "Password",
-                title: "Password",
-                inputType: TextInputType.visiblePassword,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  adminPasswordController.clear();
-                  adminUsernameController.clear();
-                });
-
-                this.setState(() {});
-
-                Navigator.pop(context);
-              },
-              child: const Text(
-                "CANCEL",
-                style: TextStyle(color: Config.customBlue),
-              ),
+    if (account.userRole!.length > 1) {
+      return await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          return OptionsPopup(
+            title: "Choose Role",
+            body: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("Pick a role and proceed to the dashboard"),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(account.userRole!.length, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: Config.customGrey)),
+                        child: ListTile(
+                          onTap: () =>
+                              Navigator.pop(context, account.userRole![index]),
+                          title:
+                              Text(toHumanReadable(account.userRole![index])),
+                        ),
+                      ),
+                    );
+                  }),
+                )
+              ],
             ),
-            CustomButton(
-              onPressed: () async {
-                if (adminPasswordController.text.isNotEmpty &&
-                    adminUsernameController.text.isNotEmpty) {
-                  Navigator.pop(context);
-
-                  adminSignIn(context);
-                } else {
-                  Fluttertoast.showToast(msg: "Please fill the form");
-                }
-              },
-              title: "PROCEED",
-              iconData: Icons.done_rounded,
-              height: 30.0,
-            )
-          ],
-        );
-      },
-    );
+          );
+        },
+      );
+    } else {
+      return account.userRole!.first;
+    }
   }
 
   void controlUserSignIn() async {
@@ -136,7 +77,7 @@ class _AuthPageState extends State<AuthPage> {
     try {
       QuerySnapshot userResults = await FirebaseFirestore.instance
           .collection("users")
-          .where("phone", isEqualTo: phoneController.text.trim())
+          .where("phone", isEqualTo: phoneNumber.split("+").last.trim())
           .where("idNumber", isEqualTo: idController.text.trim())
           .get();
 
@@ -148,67 +89,112 @@ class _AuthPageState extends State<AuthPage> {
 
         Account account = Account.fromDocument(documentSnapshot);
 
-        await FirebaseAuth.instance.verifyPhoneNumber(
-          phoneNumber: "+${account.phone}",
-          verificationCompleted: (PhoneAuthCredential credential) async {
-            // ANDROID ONLY!
+        if (account.verified!) {
+          String preferedRole = await setUserRole(account);
 
-            // Sign the user in (or link) with the auto-generated credential
-            await FirebaseAuth.instance.signInWithCredential(credential);
+          GoRouter.of(context)
+              .go("/users/${preferedRole}s/${account.id}/dashboard");
 
-            GoRouter.of(context)
-                .go("/users/${account.userRole}s/${account.id}/dashboard");
+          setState(() {
+            loading = false;
+          });
+        } else {
+          // Bypass user phone verification
 
-            setState(() {
-              loading = false;
-            });
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            if (e.code == 'invalid-phone-number') {
-              print('The provided phone number is not valid.');
-            }
+          await documentSnapshot.reference.update({
+            "verified": true,
+          });
 
-            Fluttertoast.showToast(msg: "An ERROR occured :(");
+          String preferedRole = await setUserRole(account);
 
-            setState(() {
-              loading = false;
-            });
-          },
-          codeSent: (String verificationId, int? resendToken) async {
-            // Update the UI - wait for the user to enter the SMS code
-            String smsCode = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => OTPScreen(
-                          phoneNumber: "+${account.phone}",
-                        )));
+          GoRouter.of(context)
+              .go("/users/${preferedRole}s/${account.id}/dashboard");
 
-            if (smsCode != "error" || smsCode != "cancelled") {
-              // Create a PhoneAuthCredential with the code
-              PhoneAuthCredential credential = PhoneAuthProvider.credential(
-                  verificationId: verificationId, smsCode: smsCode);
+          setState(() {
+            loading = false;
+          });
 
-              // Sign the user in (or link) with the credential
-              await FirebaseAuth.instance.signInWithCredential(credential);
+          // ==============================
+          // await FirebaseAuth.instance.verifyPhoneNumber(
+          //   phoneNumber: "+${account.phone}",
+          //   verificationCompleted: (PhoneAuthCredential credential) async {
+          //     // ANDROID ONLY!
 
-              GoRouter.of(context)
-                  .go("/users/${account.userRole}s/${account.id}/dashboard");
+          //     // Sign the user in (or link) with the auto-generated credential
+          //     await FirebaseAuth.instance.signInWithCredential(credential);
 
-              setState(() {
-                loading = false;
-              });
-            } else {
-              setState(() {
-                loading = false;
-              });
-            }
-          },
-          codeAutoRetrievalTimeout: (String verificationId) {
-            setState(() {
-              loading = false;
-            });
-          },
-        );
+          //     await documentSnapshot.reference.update({
+          //       "verified": true,
+          //     });
+
+          //     String preferedRole = await setUserRole(account);
+
+          //     GoRouter.of(context)
+          //         .go("/users/${preferedRole}s/${account.id}/dashboard");
+
+          //     setState(() {
+          //       loading = false;
+          //     });
+          //   },
+          //   verificationFailed: (FirebaseAuthException e) {
+          //     if (e.code == 'invalid-phone-number') {
+          //       print('The provided phone number is not valid.');
+          //     }
+
+          //     print("========FirebaseAuthException===========");
+
+          //     print(e.toString());
+
+          //     print("========FirebaseAuthException===========");
+
+          //     Fluttertoast.showToast(msg: "Verification Failed :(");
+
+          //     setState(() {
+          //       loading = false;
+          //     });
+          //   },
+          //   codeSent: (String verificationId, int? resendToken) async {
+          //     // Update the UI - wait for the user to enter the SMS code
+          //     String smsCode = await Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //             builder: (context) => OTPScreen(
+          //                   phoneNumber: "+${account.phone}",
+          //                 )));
+
+          //     if (smsCode != "error" || smsCode != "cancelled") {
+          //       // Create a PhoneAuthCredential with the code
+          //       PhoneAuthCredential credential = PhoneAuthProvider.credential(
+          //           verificationId: verificationId, smsCode: smsCode);
+
+          //       // Sign the user in (or link) with the credential
+          //       await FirebaseAuth.instance.signInWithCredential(credential);
+
+          //       await documentSnapshot.reference.update({
+          //         "verified": true,
+          //       });
+
+          //       String preferedRole = await setUserRole(account);
+
+          //       GoRouter.of(context)
+          //           .go("/users/${preferedRole}s/${account.id}/dashboard");
+
+          //       setState(() {
+          //         loading = false;
+          //       });
+          //     } else {
+          //       setState(() {
+          //         loading = false;
+          //       });
+          //     }
+          //   },
+          //   codeAutoRetrievalTimeout: (String verificationId) {
+          //     setState(() {
+          //       loading = false;
+          //     });
+          //   },
+          // );
+        }
       } else {
         Fluttertoast.showToast(msg: "User does NOT Exist :(");
 
@@ -237,7 +223,7 @@ class _AuthPageState extends State<AuthPage> {
         backgroundColor: Colors.transparent,
         leading: IconButton(
           padding: EdgeInsets.zero,
-          onPressed: () => GoRouter.of(context).go("/dashboard"),
+          onPressed: () => GoRouter.of(context).go("/"),
           icon: const Icon(
             Icons.arrow_back_ios_new_rounded,
             color: Config.customGrey,
@@ -266,7 +252,7 @@ class _AuthPageState extends State<AuthPage> {
                           height: 20.0,
                         ),
                         const Text(
-                          "Sign In",
+                          "Staff Sign In",
                           style: TextStyle(
                               fontSize: 22.0,
                               color: Config.customGrey,
@@ -279,11 +265,13 @@ class _AuthPageState extends State<AuthPage> {
                           ),
                         ),
                         // TextField
-                        CustomTextField(
+                        CustomPhoneField(
                           controller: phoneController,
-                          hintText: "Phone (2547XXXX)",
-                          title: "Phone Number",
-                          inputType: TextInputType.phone,
+                          onChanged: (phone) {
+                            setState(() {
+                              phoneNumber = phone.completeNumber;
+                            });
+                          },
                         ),
                         CustomTextField(
                           controller: idController,
@@ -298,9 +286,32 @@ class _AuthPageState extends State<AuthPage> {
                           title: "Sign In",
                           iconData: Icons.done_rounded,
                           onPressed: () {
-                            if (phoneController.text.isNotEmpty &&
+                            if (phoneNumber.isNotEmpty &&
                                 idController.text.isNotEmpty) {
-                              controlUserSignIn();
+                              bool isPhoneValid =
+                                  PhoneValidator.validatePhoneNumber(
+                                      phoneNumber);
+                              if (isPhoneValid) {
+                                controlUserSignIn();
+                              } else {
+                                String initialNumber =
+                                    PhoneValidator.initialPhoneNumber(
+                                        phoneNumber);
+
+                                String correctNumber =
+                                    PhoneValidator.correctPhoneNumber(
+                                        phoneNumber);
+
+                                showDialog(
+                                    context: context,
+                                    builder: (_) {
+                                      return ErrorPopup(
+                                        title: "ERROR",
+                                        body: Text(
+                                            "Wrong phone number. Start with '7' while typing phone number, \ni.e 7xx-xxx-xxx, 712345678 and NOT 07xx-xxx-xxx. \n\nYour input is '$initialNumber', maybe try '$correctNumber'"),
+                                      );
+                                    });
+                              }
                             } else {
                               Fluttertoast.showToast(msg: "Fill in the form");
                             }
@@ -309,23 +320,11 @@ class _AuthPageState extends State<AuthPage> {
                         SizedBox(
                           height: size.height * 0.1,
                         ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              "By signing in, you agree to our terms and conditions.",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 12.0, color: Config.customGrey),
-                            ),
-                            TextButton(
-                              onPressed: () => promptAdminLogin(context),
-                              child: const Text(
-                                "Admin",
-                                style: TextStyle(color: Config.customBlue),
-                              ),
-                            )
-                          ],
+                        const Text(
+                          "By signing in, you agree to our terms and conditions.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 12.0, color: Config.customGrey),
                         )
                       ],
                     ),

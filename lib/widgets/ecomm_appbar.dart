@@ -132,12 +132,35 @@ class _ECommerceAppBarState extends State<ECommerceAppBar> {
             )
           ],
         ),
-        IconButton(
-            onPressed: () => GoRouter.of(context).go("/authentication"),
-            icon: const Icon(
-              Icons.person,
-              color: Colors.white60,
-            )),
+        PopupMenuButton<EcommDropdownItem>(
+          icon: const Icon(
+            Icons.menu,
+            color: Colors.white60,
+            //size: 25.0,
+          ),
+          offset: const Offset(0.0, 10.0),
+          onSelected: (v) => GoRouter.of(context).go(v.urlDestination!),
+          itemBuilder: (BuildContext context) {
+            return dropdownItems.map((EcommDropdownItem choice) {
+              bool isAdmin = choice.title == "ADMIN";
+              Color color = isAdmin ? Config.customBlue : Config.customGrey;
+
+              return PopupMenuItem<EcommDropdownItem>(
+                value: choice,
+                child: ListTile(
+                  leading: Icon(
+                    choice.iconData,
+                    color: color,
+                  ),
+                  title: Text(
+                    choice.title!,
+                    style: TextStyle(color: color),
+                  ),
+                ),
+              );
+            }).toList();
+          },
+        ),
       ],
     );
   }
@@ -292,3 +315,22 @@ class EcommGeneralAppbar extends StatelessWidget {
     );
   }
 }
+
+class EcommDropdownItem {
+  final String? title;
+  final IconData? iconData;
+  final String? urlDestination;
+
+  EcommDropdownItem({this.title, this.iconData, this.urlDestination});
+}
+
+List<EcommDropdownItem> dropdownItems = [
+  EcommDropdownItem(
+      title: "Staff Login",
+      iconData: Icons.groups_rounded,
+      urlDestination: "/staff"),
+  EcommDropdownItem(
+      title: "ADMIN",
+      iconData: Icons.admin_panel_settings_outlined,
+      urlDestination: "/admin_login"),
+];

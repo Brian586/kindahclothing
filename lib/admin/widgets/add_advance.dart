@@ -7,6 +7,7 @@ import 'package:kindah/models/advance_payment.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
+import '../../common_functions/user_role_solver.dart';
 import '../../widgets/custom_tag.dart';
 import '../../widgets/custom_textfield.dart';
 
@@ -20,11 +21,15 @@ class AddAdvance extends StatefulWidget {
 class _AddAdvanceState extends State<AddAdvance> {
   TextEditingController userController = TextEditingController();
   TextEditingController amountController = TextEditingController();
+  TextEditingController installmentCountController = TextEditingController();
   Account? selectedUser;
+  String installmentPeriod = "Weekly";
   bool loading = false;
 
   void addAdvancePayment() async {
-    if (selectedUser != null && amountController.text.isNotEmpty) {
+    if (selectedUser != null &&
+        amountController.text.isNotEmpty &&
+        installmentCountController.text.isNotEmpty) {
       setState(() {
         loading = true;
       });
@@ -83,7 +88,11 @@ class _AddAdvanceState extends State<AddAdvance> {
             timestamp: timestamp,
             amount: int.parse(amountController.text.trim()).toDouble(),
             status: "pending",
-            user: selectedUser!.toMap());
+            user: selectedUser!.toMap(),
+            installmentCount: int.parse(installmentCountController.text.trim()),
+            installmentPeriod: installmentPeriod,
+            missedInstallments: [],
+            paidInstallments: []);
 
         // Update for User
         await FirebaseFirestore.instance
@@ -104,6 +113,7 @@ class _AddAdvanceState extends State<AddAdvance> {
           amountController.clear();
           userController.clear();
           selectedUser = null;
+          installmentCountController.clear();
         });
       }
     }
@@ -226,6 +236,48 @@ class _AddAdvanceState extends State<AddAdvance> {
                         const SizedBox(
                           height: 20.0,
                         ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                          child: DropdownSearch<String>(
+                            popupProps: const PopupProps.menu(
+                              showSelectedItems: true,
+                            ),
+                            items: const [
+                              "Daily",
+                              "Weekly",
+                              "Every Fortnight",
+                              "Monthly",
+                              "Every 3 Months",
+                              "Every 6 Months",
+                              "Yearly"
+                            ],
+                            dropdownDecoratorProps:
+                                const DropDownDecoratorProps(
+                              dropdownSearchDecoration: InputDecoration(
+                                labelText: "Installment period",
+                                hintText: "Select Installment Period",
+                              ),
+                            ),
+                            onChanged: (str) {
+                              setState(() {
+                                installmentPeriod = str!;
+                              });
+                            },
+                            selectedItem: installmentPeriod,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
+                        CustomTextField(
+                          controller: installmentCountController,
+                          hintText: "1, 2, 3...",
+                          title: "Number of Installments *",
+                          inputType: TextInputType.number,
+                        ),
+                        const SizedBox(
+                          height: 20.0,
+                        ),
                         TextButton.icon(
                             onPressed: () => addAdvancePayment(),
                             icon: const Icon(
@@ -250,8 +302,8 @@ class PopupAccountItem extends StatelessWidget {
   final Account? user;
   const PopupAccountItem({super.key, this.user});
 
-  Color tagColor() {
-    switch (user!.userRole) {
+  Color tagColor(String role) {
+    switch (role) {
       case "shop_attendant":
         return Colors.teal;
       case "fabric_cutter":
@@ -262,21 +314,6 @@ class PopupAccountItem extends StatelessWidget {
         return Colors.lime;
       default:
         return Colors.teal;
-    }
-  }
-
-  String displayUserRole() {
-    switch (user!.userRole) {
-      case "shop_attendant":
-        return "Shop Attendant";
-      case "fabric_cutter":
-        return "Fabric Cutter";
-      case "tailor":
-        return "Tailor";
-      case "finisher":
-        return "Finisher";
-      default:
-        return "User";
     }
   }
 
@@ -303,9 +340,17 @@ class PopupAccountItem extends StatelessWidget {
             "+${user!.phone!}",
             style: const TextStyle(color: Config.customGrey),
           ),
-          CustomTag(
-            title: displayUserRole(),
-            color: tagColor(),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(
+                  user!.userRole!.length,
+                  (index) => CustomTag(
+                        title: toHumanReadable(user!.userRole![index]),
+                        color: tagColor(user!.userRole![index]),
+                      )),
+            ),
           )
         ],
       ),

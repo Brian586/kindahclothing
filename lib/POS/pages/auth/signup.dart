@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindah/POS/models/pos_user.dart';
 import 'package:kindah/widgets/custom_button.dart';
+import 'package:uuid/uuid.dart';
 import '../../../widgets/progress_widget.dart';
 
 import '../../../pages/otp_screen.dart';
@@ -38,38 +39,48 @@ class _SignupState extends State<Signup> {
     super.dispose();
   }
 
-  Future<String> createUser(UserCredential userCredential) async {
+  Future<String> createUser() async {
     // Create POS_User
 
-    POSUser posUser = POSUser(
-        userID: userCredential.user!.uid,
-        username: usernameController.text.trim(),
-        storeID: storeIDController.text.trim(),
-        timestamp: DateTime.now().millisecondsSinceEpoch,
-        phone: phoneController.text.trim(),
-        isNew: true,
-        orderCount: 0,
-        products: 0);
+    try {
+      // Generate time-based unique ID
+      String uniqueID = const Uuid().v1();
 
-    // Then upload to firestore
-    await FirebaseFirestore.instance
-        .collection("POS_users")
-        .doc(posUser.userID)
-        .set(posUser.toMap());
+      String userID = uniqueID.split("-").join("");
 
-    // Add default category
-    await FirebaseFirestore.instance
-        .collection("POS_users")
-        .doc(posUser.userID)
-        .collection("categories")
-        .doc("categories")
-        .set({
-      "cat": [
-        "All",
-      ]
-    });
+      POSUser posUser = POSUser(
+          userID: userID,
+          username: usernameController.text.trim(),
+          storeID: storeIDController.text.trim(),
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          phone: phoneController.text.trim(),
+          isNew: true,
+          orderCount: 0,
+          products: 0);
 
-    return 'success';
+      // Then upload to firestore
+      await FirebaseFirestore.instance
+          .collection("POS_users")
+          .doc(posUser.userID)
+          .set(posUser.toMap());
+
+      // Add default category
+      await FirebaseFirestore.instance
+          .collection("POS_users")
+          .doc(posUser.userID)
+          .collection("categories")
+          .doc("categories")
+          .set({
+        "cat": [
+          "All",
+        ]
+      });
+
+      return userID;
+    } catch (e) {
+      print(e.toString());
+      return "";
+    }
   }
 
   void performSignUp() async {
@@ -77,83 +88,101 @@ class _SignupState extends State<Signup> {
       loading = true;
     });
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: "+${phoneController.text.trim()}",
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // ANDROID ONLY!
+    // Bypass user phone verification
 
-        // Sign the user in (or link) with the auto-generated credential
-        final UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithCredential(credential);
+    String userID = await createUser();
 
-        String res = await createUser(userCredential);
+    if (userID.isNotEmpty) {
+      GoRouter.of(context).go("/POS/$userID/home");
 
-        if (res == 'success') {
-          GoRouter.of(context).go("/POS/${userCredential.user!.uid}/home");
+      setState(() {
+        loading = false;
+      });
+    } else {
+      setState(() {
+        loading = false;
+      });
+    }
 
-          setState(() {
-            loading = false;
-          });
-        } else {
-          setState(() {
-            loading = false;
-          });
-        }
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        if (e.code == 'invalid-phone-number') {
-          print('The provided phone number is not valid.');
-        }
+    // ==============================
 
-        Fluttertoast.showToast(msg: "An ERROR occured :(");
+    // await FirebaseAuth.instance.verifyPhoneNumber(
+    //   phoneNumber: "+${phoneController.text.trim()}",
+    //   verificationCompleted: (PhoneAuthCredential credential) async {
+    //     // ANDROID ONLY!
 
-        setState(() {
-          loading = false;
-        });
-      },
-      codeSent: (String verificationId, int? resendToken) async {
-        // Update the UI - wait for the user to enter the SMS code
-        String smsCode = await Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => OTPScreen(
-                      phoneNumber: "+${phoneController.text.trim()}",
-                    )));
+    //     // Sign the user in (or link) with the auto-generated credential
+    //     final UserCredential userCredential =
+    //         await FirebaseAuth.instance.signInWithCredential(credential);
 
-        if (smsCode != "error" || smsCode != "cancelled") {
-          // Create a PhoneAuthCredential with the code
-          PhoneAuthCredential credential = PhoneAuthProvider.credential(
-              verificationId: verificationId, smsCode: smsCode);
+    //     String userID = await createUser();
 
-          // Sign the user in (or link) with the auto-generated credential
-          final UserCredential userCredential =
-              await FirebaseAuth.instance.signInWithCredential(credential);
+    //     if (res == 'success') {
+    //       GoRouter.of(context).go("/POS/${userCredential.user!.uid}/home");
 
-          String res = await createUser(userCredential);
+    //       setState(() {
+    //         loading = false;
+    //       });
+    //     } else {
+    //       setState(() {
+    //         loading = false;
+    //       });
+    //     }
+    //   },
+    //   verificationFailed: (FirebaseAuthException e) {
+    //     if (e.code == 'invalid-phone-number') {
+    //       print('The provided phone number is not valid.');
+    //     }
 
-          if (res == 'success') {
-            GoRouter.of(context).go("/POS/${userCredential.user!.uid}/home");
+    //     Fluttertoast.showToast(msg: "An ERROR occured :(");
 
-            setState(() {
-              loading = false;
-            });
-          } else {
-            setState(() {
-              loading = false;
-            });
-          }
-        } else {
-          setState(() {
-            loading = false;
-          });
-        }
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        setState(() {
-          loading = false;
-        });
-      },
-    );
+    //     setState(() {
+    //       loading = false;
+    //     });
+    //   },
+    //   codeSent: (String verificationId, int? resendToken) async {
+    //     // Update the UI - wait for the user to enter the SMS code
+    //     String smsCode = await Navigator.push(
+    //         context,
+    //         MaterialPageRoute(
+    //             builder: (context) => OTPScreen(
+    //                   phoneNumber: "+${phoneController.text.trim()}",
+    //                 )));
+
+    //     if (smsCode != "error" || smsCode != "cancelled") {
+    //       // Create a PhoneAuthCredential with the code
+    //       PhoneAuthCredential credential = PhoneAuthProvider.credential(
+    //           verificationId: verificationId, smsCode: smsCode);
+
+    //       // Sign the user in (or link) with the auto-generated credential
+    //       final UserCredential userCredential =
+    //           await FirebaseAuth.instance.signInWithCredential(credential);
+
+    //       String res = await createUser(userCredential);
+
+    //       if (res == 'success') {
+    //         GoRouter.of(context).go("/POS/${userCredential.user!.uid}/home");
+
+    //         setState(() {
+    //           loading = false;
+    //         });
+    //       } else {
+    //         setState(() {
+    //           loading = false;
+    //         });
+    //       }
+    //     } else {
+    //       setState(() {
+    //         loading = false;
+    //       });
+    //     }
+    //   },
+    //   codeAutoRetrievalTimeout: (String verificationId) {
+    //     setState(() {
+    //       loading = false;
+    //     });
+    //   },
+    // );
   }
 
   @override

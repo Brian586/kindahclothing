@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../common_functions/user_role_solver.dart';
 import '../../config.dart';
 import '../../models/account.dart';
 import '../../providers/account_provider.dart';
@@ -15,24 +16,10 @@ class UserPanelAppbar extends StatelessWidget {
     this.scaffoldKey,
   });
 
-  String filterUserRole(Account account) {
-    switch (account.userRole) {
-      case "shop_attendant":
-        return "Shop Attendant";
-      case "fabric_cutter":
-        return "Fabric Cutter";
-      case "tailor":
-        return "Tailor";
-      case "finisher":
-        return "Finisher";
-      default:
-        return "Tailor";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Account account = context.watch<AccountProvider>().account;
+    String preferedRole = context.watch<AccountProvider>().preferedRole;
 
     return AppBar(
       flexibleSpace: Container(
@@ -57,7 +44,7 @@ class UserPanelAppbar extends StatelessWidget {
             maxLines: 1,
           ),
           Text(
-            filterUserRole(account),
+            toHumanReadable(preferedRole),
             style: const TextStyle(fontSize: 13.0, color: Colors.white60),
           )
         ],
@@ -82,8 +69,7 @@ class UserPanelAppbar extends StatelessWidget {
             InkWell(
               onTap: () {
                 context.read<AccountProvider>().changeDrawerItem("settings");
-                context
-                    .go("/users/${account.userRole}s/${account.id}/settings");
+                context.go("/users/${preferedRole}s/${account.id}/settings");
               },
               child: CircleAvatar(
                 backgroundImage: const AssetImage("assets/images/profile.png"),

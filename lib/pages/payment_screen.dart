@@ -31,6 +31,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool loading = false;
   bool paymentProcessing = false;
   TextEditingController phoneController = TextEditingController();
+  String phoneNumber = "";
 
   void proceedBackToTemplate(Map<String, dynamic> map) {
     String jsonString = json.encode(map);
@@ -43,17 +44,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void processCashPayment() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
         return CustomPopup(
           title: "Client's Phone",
           onAccepted: () async {
-            if (phoneController.text.isNotEmpty) {
+            if (phoneNumber.isNotEmpty) {
               Navigator.pop(context);
 
               Map<String, dynamic> map = {
                 "payment_method": "Cash",
                 "status": "paid",
-                "contact": phoneController.text.trim()
+                "contact": phoneNumber.split("+").last.trim()
               };
 
               proceedBackToTemplate(map);
@@ -74,11 +76,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
           body: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomTextField(
+              CustomPhoneField(
                 controller: phoneController,
-                hintText: "2547XXXX",
-                title: "Phone Number",
-                inputType: TextInputType.phone,
+                onChanged: (phone) {
+                  setState(() {
+                    phoneNumber = phone.completeNumber;
+                  });
+                },
               ),
             ],
           ),
@@ -88,7 +92,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void processMPesaTransaction() async {
-    if (phoneController.text.isNotEmpty) {
+    if (phoneNumber.isNotEmpty) {
       Navigator.pop(context);
 
       setState(() {
@@ -97,7 +101,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       var res = await MPesa().processTransaction(
           amount: widget.totalAmount.toString(),
-          phone: phoneController.text.trim());
+          phone: phoneNumber.split("+").last.trim());
 
       var actualResult = json.decode(res);
 
@@ -126,6 +130,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void promptMPesaPayment() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
         return CustomPopup(
           title: "Client's Phone",
@@ -143,11 +148,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
           body: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomTextField(
+              CustomPhoneField(
                 controller: phoneController,
-                hintText: "2547XXXX",
-                title: "Phone Number",
-                inputType: TextInputType.phone,
+                onChanged: (phone) {
+                  setState(() {
+                    phoneNumber = phone.completeNumber;
+                  });
+                },
               ),
             ],
           ),
@@ -157,7 +164,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void processPaypalTransaction() async {
-    if (phoneController.text.isNotEmpty) {
+    if (phoneNumber.isNotEmpty) {
       Navigator.pop(context);
 
       setState(() {
@@ -168,16 +175,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       switch (widget.page) {
         case "pos_cart":
-          res = await PayPal().posPayment(
-              widget.data, widget.totalAmount!, phoneController.text.trim());
+          res = await PayPal().posPayment(widget.data, widget.totalAmount!,
+              phoneNumber.split("+").last.trim());
           break;
         case "ecommerce":
-          res = await PayPal().ecommercePayment(
-              widget.data, widget.totalAmount!, phoneController.text.trim());
+          res = await PayPal().ecommercePayment(widget.data,
+              widget.totalAmount!, phoneNumber.split("+").last.trim());
           break;
         case "uniform":
-          res = await PayPal().uniformPayment(
-              widget.data, widget.totalAmount!, phoneController.text.trim());
+          res = await PayPal().uniformPayment(widget.data, widget.totalAmount!,
+              phoneNumber.split("+").last.trim());
           break;
       }
 
@@ -208,6 +215,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   promptPaypalPayment() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
         return CustomPopup(
           title: "Client's Phone",
@@ -225,11 +233,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
           body: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomTextField(
+              CustomPhoneField(
                 controller: phoneController,
-                hintText: "2547XXXX",
-                title: "Phone Number",
-                inputType: TextInputType.phone,
+                onChanged: (phone) {
+                  setState(() {
+                    phoneNumber = phone.completeNumber;
+                  });
+                },
               ),
             ],
           ),

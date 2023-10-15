@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:kindah/config.dart';
+import 'package:kindah/models/account.dart';
 import 'package:kindah/models/tariff.dart';
 import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_textfield.dart';
 import '../widgets/custom_header.dart';
 
@@ -22,6 +24,7 @@ class MyTariffs extends StatefulWidget {
 }
 
 class _MyTariffsState extends State<MyTariffs> {
+  final ScrollController _controller = ScrollController();
   bool addTariff = false;
   bool uploading = false;
   List<String> selectedUserRoles = [];
@@ -131,12 +134,7 @@ class _MyTariffsState extends State<MyTariffs> {
                         inputType: TextInputType.number,
                       ),
                       DropdownSearch<String>.multiSelection(
-                        items: const [
-                          "Shop Attendant",
-                          "Fabric Cutter",
-                          "Tailor",
-                          "Finisher"
-                        ],
+                        items: userRoles,
                         popupProps: const PopupPropsMultiSelection.menu(
                           showSelectedItems: true,
                         ),
@@ -198,147 +196,155 @@ class _MyTariffsState extends State<MyTariffs> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          widget.isAdmin
-              ? CustomHeader(
-                  action: [
-                    CustomButton(
-                      title: "Add Tariff",
-                      iconData: Icons.add,
-                      height: 30.0,
-                      onPressed: () {
-                        setState(() {
-                          addTariff = true;
-                        });
-                      },
-                    )
-                  ],
-                )
-              : UserCustomHeader(
-                  action: [
-                    CustomButton(
-                      title: "Add Tariff",
-                      iconData: Icons.add,
-                      height: 30.0,
-                      onPressed: () {
-                        setState(() {
-                          addTariff = true;
-                        });
-                      },
-                    )
-                  ],
-                ),
-          addTariff ? newTariff(size) : SizedBox(),
-          FutureBuilder<QuerySnapshot>(
-            future: FirebaseFirestore.instance
-                .collection("tariffs")
-                .orderBy("timestamp", descending: true)
-                .get(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return circularProgress();
-              } else {
-                List<Tariff> tariffs = [];
-                snapshot.data!.docs.forEach((element) {
-                  Tariff tariff = Tariff.fromDocument(element);
-
-                  tariffs.add(tariff);
-                });
-
-                return tariffs.isEmpty
-                    ? const Center(
-                        child: Icon(
-                          Icons.currency_exchange_outlined,
-                          color: Config.customGrey,
-                        ),
+    return CustomScrollBar(
+      controller: _controller,
+      child: SingleChildScrollView(
+        controller: _controller,
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            widget.isAdmin
+                ? CustomHeader(
+                    action: [
+                      CustomButton(
+                        title: "Add Tariff",
+                        iconData: Icons.add,
+                        height: 30.0,
+                        onPressed: () {
+                          setState(() {
+                            addTariff = true;
+                          });
+                        },
                       )
-                    : CustomWrapper(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(tariffs.length, (index) {
-                            Tariff tariff = tariffs[index];
-                            bool isActive = tariff.isOn!;
+                    ],
+                  )
+                : UserCustomHeader(
+                    action: [
+                      CustomButton(
+                        title: "Add Tariff",
+                        iconData: Icons.add,
+                        height: 30.0,
+                        onPressed: () {
+                          setState(() {
+                            addTariff = true;
+                          });
+                        },
+                      )
+                    ],
+                  ),
+            addTariff ? newTariff(size) : SizedBox(),
+            FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection("tariffs")
+                  .orderBy("timestamp", descending: true)
+                  .get(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return circularProgress();
+                } else {
+                  List<Tariff> tariffs = [];
+                  snapshot.data!.docs.forEach((element) {
+                    Tariff tariff = Tariff.fromDocument(element);
 
-                            return Card(
-                              elevation: 0.0,
-                              color: isActive
-                                  ? Config.customBlue.withOpacity(0.05)
-                                  : Colors.transparent,
-                              child: ListTile(
-                                leading: const Icon(
-                                  Icons.currency_exchange_outlined,
-                                  color: Config.customGrey,
-                                ),
-                                title: Text(tariff.title!),
-                                subtitle: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Created: ${DateFormat("dd MMM, HH:mm a").format(DateTime.fromMillisecondsSinceEpoch(tariff.timestamp!))}",
-                                      style: const TextStyle(
-                                          fontSize: 12.0,
-                                          color: Config.customGrey),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Text(
-                                      "Rates: Ksh ${tariff.value} per Order",
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    const Text("This Tariff applies to:"),
-                                    Wrap(
-                                      alignment: WrapAlignment.start,
-                                      spacing: 2.5,
-                                      runSpacing: 5.0,
-                                      children: List.generate(
-                                          tariff.users!.length, (index) {
-                                        return Card(
-                                          elevation: 0.0,
-                                          color: Config.customBlue
-                                              .withOpacity(0.1),
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0)),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 10.0,
-                                                vertical: 5.0),
-                                            child: Text(
-                                              tariff.users![index],
-                                              style: const TextStyle(
-                                                  color: Config.customBlue,
-                                                  fontWeight: FontWeight.w600),
+                    tariffs.add(tariff);
+                  });
+
+                  return tariffs.isEmpty
+                      ? const Center(
+                          child: Icon(
+                            Icons.currency_exchange_outlined,
+                            color: Config.customGrey,
+                          ),
+                        )
+                      : CustomWrapper(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(tariffs.length, (index) {
+                              Tariff tariff = tariffs[index];
+                              bool isActive = tariff.isOn!;
+
+                              return Card(
+                                elevation: 0.0,
+                                color: isActive
+                                    ? Config.customBlue.withOpacity(0.05)
+                                    : Colors.transparent,
+                                child: ListTile(
+                                  leading: const Icon(
+                                    Icons.currency_exchange_outlined,
+                                    color: Config.customGrey,
+                                  ),
+                                  title: Text(tariff.title!),
+                                  subtitle: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Created: ${DateFormat("dd MMM, HH:mm a").format(DateTime.fromMillisecondsSinceEpoch(tariff.timestamp!))}",
+                                        style: const TextStyle(
+                                            fontSize: 12.0,
+                                            color: Config.customGrey),
+                                      ),
+                                      const SizedBox(
+                                        height: 10.0,
+                                      ),
+                                      Text(
+                                        "Rates: Ksh ${tariff.value} per Order",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(
+                                        height: 10.0,
+                                      ),
+                                      const Text("This Tariff applies to:"),
+                                      Wrap(
+                                        alignment: WrapAlignment.start,
+                                        spacing: 2.5,
+                                        runSpacing: 5.0,
+                                        children: List.generate(
+                                            tariff.users!.length, (index) {
+                                          return Card(
+                                            elevation: 0.0,
+                                            color: Config.customBlue
+                                                .withOpacity(0.1),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        15.0)),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10.0,
+                                                      vertical: 5.0),
+                                              child: Text(
+                                                tariff.users![index],
+                                                style: const TextStyle(
+                                                    color: Config.customBlue,
+                                                    fontWeight:
+                                                        FontWeight.w600),
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      }),
-                                    )
-                                  ],
+                                          );
+                                        }),
+                                      )
+                                    ],
+                                  ),
+                                  trailing: Text(
+                                    isActive ? "Active" : "",
+                                    style: const TextStyle(
+                                        color: Config.customBlue),
+                                  ),
                                 ),
-                                trailing: Text(
-                                  isActive ? "Active" : "",
-                                  style:
-                                      const TextStyle(color: Config.customBlue),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      );
-              }
-            },
-          )
-        ],
+                              );
+                            }),
+                          ),
+                        );
+                }
+              },
+            )
+          ],
+        ),
       ),
     );
   }

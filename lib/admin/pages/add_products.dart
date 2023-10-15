@@ -17,6 +17,7 @@ import 'package:uuid/uuid.dart';
 import '../../common_functions/custom_file_picker.dart';
 import '../../config.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_textfield.dart';
 import '../../widgets/custom_wrapper.dart';
 
@@ -32,6 +33,7 @@ class _AddProductsState extends State<AddProducts> {
   TextEditingController titleController = TextEditingController();
   TextEditingController priceController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  final ScrollController _controller = ScrollController();
   String selectedCategory = "";
   List<dynamic> categories = [];
   List<PlatformFile> images = [];
@@ -177,121 +179,125 @@ class _AddProductsState extends State<AddProducts> {
   Widget build(BuildContext context) {
     return loading
         ? circularProgress()
-        : SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                widget.isAdmin
-                    ? CustomHeader(
-                        action: [
-                          CustomButton(
-                            onPressed: () => pickPhotos(),
-                            height: 30.0,
-                            title: "Pick Photos",
-                            iconData: Icons.add_a_photo_rounded,
-                          )
-                        ],
-                      )
-                    : UserCustomHeader(
-                        action: [
-                          CustomButton(
-                            onPressed: () => pickPhotos(),
-                            height: 30.0,
-                            title: "Pick Photos",
-                            iconData: Icons.add_a_photo_rounded,
-                          )
-                        ],
-                      ),
-                displayImages(),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: CustomWrapper(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(
-                            height: 20.0,
-                          ),
-                          const Text(
-                            "Fields marked * are Required",
-                            style: TextStyle(
-                                fontSize: 12.0, color: Config.customGrey),
-                          ),
-                          CustomTextField(
-                            controller: titleController,
-                            hintText: "Title",
-                            title: "Product Title *",
-                            inputType: TextInputType.name,
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 5.0),
-                            child: DropdownSearch<dynamic>(
-                              popupProps: PopupProps.menu(
-                                showSelectedItems: false,
-                                disabledItemFn: (dynamic s) =>
-                                    s.startsWith('A'),
-                              ),
-                              items: categories,
-                              dropdownDecoratorProps:
-                                  const DropDownDecoratorProps(
-                                dropdownSearchDecoration: InputDecoration(
-                                  labelText: "Category",
-                                  hintText: "Category",
-                                ),
-                              ),
-                              onChanged: (str) {
-                                setState(() {
-                                  selectedCategory = str;
-                                });
-                              },
-                              // selectedItem: ,
+        : CustomScrollBar(
+            controller: _controller,
+            child: SingleChildScrollView(
+              controller: _controller,
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  widget.isAdmin
+                      ? CustomHeader(
+                          action: [
+                            CustomButton(
+                              onPressed: () => pickPhotos(),
+                              height: 30.0,
+                              title: "Pick Photos",
+                              iconData: Icons.add_a_photo_rounded,
+                            )
+                          ],
+                        )
+                      : UserCustomHeader(
+                          action: [
+                            CustomButton(
+                              onPressed: () => pickPhotos(),
+                              height: 30.0,
+                              title: "Pick Photos",
+                              iconData: Icons.add_a_photo_rounded,
+                            )
+                          ],
+                        ),
+                  displayImages(),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomWrapper(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              height: 20.0,
                             ),
-                          ),
-                          CustomTextField(
-                            controller: priceController,
-                            hintText: "Price",
-                            title: "Price (KES) *",
-                            inputType: TextInputType.number,
-                          ),
-                          CustomTextField(
-                            controller: descriptionController,
-                            hintText: "Description",
-                            title: "Description *",
-                            inputType: TextInputType.text,
-                          ),
-                          const SizedBox(
-                            height: 30.0,
-                          ),
-                          CustomButton(
-                            title: "SAVE",
-                            iconData: Icons.done_rounded,
-                            onPressed: () {
-                              if (titleController.text.isNotEmpty &&
-                                  priceController.text.isNotEmpty &&
-                                  selectedCategory != "" &&
-                                  images.isNotEmpty &&
-                                  descriptionController.text.isNotEmpty) {
-                                saveProductToFirestore();
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg: "Fill in the required fields");
-                              }
-                            },
-                          ),
-                          const SizedBox(
-                            height: 50.0,
-                          )
-                        ],
+                            const Text(
+                              "Fields marked * are Required",
+                              style: TextStyle(
+                                  fontSize: 12.0, color: Config.customGrey),
+                            ),
+                            CustomTextField(
+                              controller: titleController,
+                              hintText: "Title",
+                              title: "Product Title *",
+                              inputType: TextInputType.name,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 5.0),
+                              child: DropdownSearch<dynamic>(
+                                popupProps: PopupProps.menu(
+                                  showSelectedItems: false,
+                                  disabledItemFn: (dynamic s) =>
+                                      s.startsWith('A'),
+                                ),
+                                items: categories,
+                                dropdownDecoratorProps:
+                                    const DropDownDecoratorProps(
+                                  dropdownSearchDecoration: InputDecoration(
+                                    labelText: "Category",
+                                    hintText: "Category",
+                                  ),
+                                ),
+                                onChanged: (str) {
+                                  setState(() {
+                                    selectedCategory = str;
+                                  });
+                                },
+                                // selectedItem: ,
+                              ),
+                            ),
+                            CustomTextField(
+                              controller: priceController,
+                              hintText: "Price",
+                              title: "Price (KES) *",
+                              inputType: TextInputType.number,
+                            ),
+                            CustomTextField(
+                              controller: descriptionController,
+                              hintText: "Description",
+                              title: "Description *",
+                              inputType: TextInputType.text,
+                            ),
+                            const SizedBox(
+                              height: 30.0,
+                            ),
+                            CustomButton(
+                              title: "SAVE",
+                              iconData: Icons.done_rounded,
+                              onPressed: () {
+                                if (titleController.text.isNotEmpty &&
+                                    priceController.text.isNotEmpty &&
+                                    selectedCategory != "" &&
+                                    images.isNotEmpty &&
+                                    descriptionController.text.isNotEmpty) {
+                                  saveProductToFirestore();
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Fill in the required fields");
+                                }
+                              },
+                            ),
+                            const SizedBox(
+                              height: 50.0,
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           );
   }

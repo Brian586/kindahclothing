@@ -4,6 +4,7 @@ import 'package:kindah/config.dart';
 import 'package:kindah/models/admin.dart';
 import 'package:kindah/providers/admin_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 import '../../models/drawer_item.dart';
 
@@ -140,34 +141,47 @@ class _DrawerItemDesignState extends State<DrawerItemDesign> {
     Admin admin = context.watch<AdminProvider>().admin;
     bool isSelected = selectedDrawerItem == widget.item.urlID;
 
-    return Container(
-      width: size.width,
-      color: isSelected ? Colors.black26 : Colors.transparent,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-          child: TextButton.icon(
-            onPressed: () {
-              context
-                  .read<AdminProvider>()
-                  .changeDrawerItem(widget.item.urlID!);
+    return ResponsiveBuilder(
+      builder: (context, sizingInformation) {
+        bool isMobile =
+            sizingInformation.isMobile || sizingInformation.isTablet;
 
-              context.go("/admin/${admin.id}/${widget.item.urlID}");
-            },
-            label: Text(
-              widget.item.name!,
-              style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.white : Colors.white70),
-            ),
-            icon: Icon(
-              widget.item.iconData,
-              color: isSelected ? Colors.white : Colors.white70,
+        return Container(
+          width: size.width,
+          color: isSelected ? Colors.black26 : Colors.transparent,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+              child: TextButton.icon(
+                onPressed: () {
+                  context
+                      .read<AdminProvider>()
+                      .changeDrawerItem(widget.item.urlID!);
+
+                  context.go("/admin/${admin.id}/${widget.item.urlID}");
+
+                  if (isMobile) {
+                    Navigator.pop(context);
+                  }
+                },
+                label: Text(
+                  widget.item.name!,
+                  style: TextStyle(
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? Colors.white : Colors.white70),
+                ),
+                icon: Icon(
+                  widget.item.iconData,
+                  color: isSelected ? Colors.white : Colors.white70,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

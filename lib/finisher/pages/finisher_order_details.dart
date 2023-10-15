@@ -76,7 +76,6 @@ class _FinisherOrderDetailsState extends State<FinisherOrderDetails> {
     return AdaptiveUI(
       appbarLeading: IconButton(
         onPressed: () => Navigator.pop(context),
-        //context.go("/users/${account.userRole}s/${account.id}/home"),
         icon: const Icon(
           Icons.arrow_back_ios_rounded,
           color: Colors.white,

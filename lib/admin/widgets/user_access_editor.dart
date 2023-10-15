@@ -6,7 +6,9 @@ import 'package:kindah/widgets/custom_button.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
+import '../../common_functions/user_role_solver.dart';
 import '../../models/account.dart';
+import '../../widgets/custom_tag.dart';
 
 class UserAccessEditor extends StatefulWidget {
   final Account? account;
@@ -208,11 +210,31 @@ class _UserAccessEditorState extends State<UserAccessEditor> {
                     children: [
                       ListTile(
                         title: Text(
-                          "Access Rights: ${widget.account!.username}, ${widget.account!.userRole!.split("_").join(" ")}",
+                          "Access Rights: ${widget.account!.username}",
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
-                        subtitle: Text(
-                            "Select what ${widget.account!.username} is allowed to access from the User Panel"),
+                        subtitle: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: List.generate(
+                                    widget.account!.userRole!.length,
+                                    (index) => CustomTag(
+                                          title: toHumanReadable(
+                                              widget.account!.userRole![index]),
+                                          color: tagColor(
+                                              widget.account!.userRole![index]),
+                                        )),
+                              ),
+                            ),
+                            Text(
+                                "Select what ${widget.account!.username} is allowed to access from the User Panel"),
+                          ],
+                        ),
                       ),
                       const Divider(
                         color: Config.customGrey,

@@ -198,6 +198,7 @@ class _UserDrawerItemDesignState extends State<UserDrawerItemDesign> {
     String selectedDrawerItem =
         context.watch<AccountProvider>().selectedDrawerItem;
     Account account = context.watch<AccountProvider>().account;
+    String preferedRole = context.watch<AccountProvider>().preferedRole;
     bool isSelected = selectedDrawerItem == widget.item.urlID;
 
     return Container(
@@ -215,7 +216,7 @@ class _UserDrawerItemDesignState extends State<UserDrawerItemDesign> {
                   .changeDrawerItem(widget.item.urlID!);
 
               context.go(
-                  "/users/${account.userRole}s/${account.id}/${widget.item.urlID}");
+                  "/users/${preferedRole}s/${account.id}/${widget.item.urlID}");
             },
             label: Text(
               widget.item.name!,

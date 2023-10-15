@@ -25,8 +25,8 @@ class OrderDesign extends StatefulWidget {
 }
 
 class _OrderDesignState extends State<OrderDesign> {
-  void onTemplateSelected(BuildContext context, Account account) {
-    switch (account.userRole) {
+  void onTemplateSelected(BuildContext context, String preferedRole) {
+    switch (preferedRole) {
       case "tailor":
         Navigator.push(
             context,
@@ -104,11 +104,12 @@ class _OrderDesignState extends State<OrderDesign> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     Account account = context.watch<AccountProvider>().account;
+    String preferedRole = context.watch<AccountProvider>().preferedRole;
 
     return Card(
       child: ListTile(
         contentPadding: EdgeInsets.zero,
-        onTap: () => onTemplateSelected(context, account),
+        onTap: () => onTemplateSelected(context, preferedRole),
         splashColor: Config.customBlue.withOpacity(0.1),
         leading: Image.network(
           widget.order.school!["imageUrl"],

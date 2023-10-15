@@ -10,6 +10,7 @@ class Admin {
   final int? fabricCutters;
   final int? shopAttendants;
   final int? finishers;
+  final int? specialMachineHandler;
   final String? photoUrl;
   final int? products;
   final int? schools;
@@ -27,6 +28,7 @@ class Admin {
       this.email,
       this.schools,
       this.uniforms,
+      required this.specialMachineHandler,
       required this.finishers,
       this.phone});
 
@@ -41,6 +43,7 @@ class Admin {
       "fabricCutters": fabricCutters,
       "photoUrl": photoUrl,
       "shopAttendants": shopAttendants,
+      "specialMachineHandler": specialMachineHandler,
       "products": products,
       "schools": schools,
       "uniforms": uniforms,
@@ -62,6 +65,7 @@ class Admin {
         schools: doc["schools"],
         finishers: doc["finishers"],
         uniforms: doc["uniforms"],
+        specialMachineHandler: doc["specialMachineHandler"],
         phone: doc["phone"]);
   }
 }

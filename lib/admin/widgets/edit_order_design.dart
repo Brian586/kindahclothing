@@ -187,6 +187,7 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
   void promptOrderDeletion() async {
     String res = await showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (_) {
           return CustomPopup(
             title: "Delete Order",
@@ -365,6 +366,7 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
                   inputType: TextInputType.number,
                 ),
                 DropdownSearch<School>(
+                  compareFn: (item1, item2) => item1.id == item2.id,
                   asyncItems: (String? filter) => getSchools(filter!),
                   clearButtonProps: const ClearButtonProps(isVisible: true),
                   popupProps: PopupProps.menu(

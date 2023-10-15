@@ -6,11 +6,7 @@ import 'package:kindah/POS/pages/pos_cart_page.dart';
 import 'package:kindah/POS/pages/upload_page.dart';
 import 'package:kindah/POS/point_of_sale.dart';
 import 'package:kindah/admin/admin_panel.dart';
-import 'package:kindah/fabric_cutter/fabric_cutter.dart';
-import 'package:kindah/fabric_cutter/pages/template_details.dart';
-import 'package:kindah/finisher/finisher.dart';
 import 'package:kindah/main.dart';
-import 'package:kindah/pages/NFC/nfc_sender.dart';
 import 'package:kindah/pages/auth.dart';
 import 'package:kindah/pages/cart_screen.dart';
 import 'package:kindah/pages/favourites_screen.dart';
@@ -18,16 +14,13 @@ import 'package:kindah/pages/home.dart';
 import 'package:kindah/pages/paypal_success.dart';
 import 'package:kindah/pages/privacy_policy.dart';
 import 'package:kindah/pages/search_page.dart';
-import 'package:kindah/shop_attendant/pages/add_template.dart';
-import 'package:kindah/shop_attendant/shop_attendant.dart';
-import 'package:kindah/tailor/tailor.dart';
 import 'package:kindah/user_panel/user_panel.dart';
 
 import 'POS/pages/analytics_page.dart';
 import 'POS/pages/pos_home.dart';
 import 'POS/pages/pos_category_page.dart';
 import 'POS/pages/pos_settings.dart';
-import 'pages/user_settings.dart';
+import 'pages/admin_auth.dart';
 
 class CustomRoutes {
   static final GoRouter router = GoRouter(routes: [
@@ -40,8 +33,12 @@ class CustomRoutes {
       builder: (context, state) => const Home(),
     ),
     GoRoute(
-      path: "/authentication",
+      path: "/staff",
       builder: (context, state) => const AuthPage(),
+    ),
+    GoRoute(
+      path: "/admin_login",
+      builder: (context, state) => const AdminAuth(),
     ),
     GoRoute(
       path: "/search",
@@ -132,7 +129,8 @@ class CustomRoutes {
       path: "/users/:userRole/:userID/:currentTab",
       builder: (context, state) => UserPanel(
         userID: state.params['userID'],
-        userRole: state.params['userRole'],
+        userRole: state.params['userRole']!
+            .substring(0, state.params['userRole']!.length - 1),
         currentTab: state.params['currentTab'] == "home"
             ? "dashboard"
             : state.params['currentTab'],

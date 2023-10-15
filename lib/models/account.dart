@@ -7,9 +7,11 @@ class Account {
   final String? phone;
   final String? idNumber;
   final String? photoUrl;
-  final String? userRole;
+  final List<dynamic>? userRole;
   final int? timestamp;
   final bool? isNew;
+  final bool? verified;
+  final List<dynamic>? devices;
 
   Account(
       {this.id,
@@ -20,6 +22,8 @@ class Account {
       this.userRole,
       this.isNew,
       this.timestamp,
+      required this.verified,
+      required this.devices,
       this.phone});
 
   Map<String, dynamic> toMap() {
@@ -32,6 +36,8 @@ class Account {
       "userRole": userRole,
       "photoUrl": photoUrl,
       "timestamp": timestamp,
+      "verified": verified,
+      "devices": devices,
       "isNew": isNew,
     };
   }
@@ -46,6 +52,8 @@ class Account {
         userRole: doc["userRole"],
         timestamp: doc["timestamp"],
         isNew: doc["isNew"],
+        verified: doc["verified"],
+        devices: doc["devices"],
         phone: doc["phone"]);
   }
 
@@ -59,6 +67,24 @@ class Account {
         userRole: doc["userRole"],
         timestamp: doc["timestamp"],
         isNew: doc["isNew"],
+        verified: doc["verified"],
+        devices: doc["devices"],
         phone: doc["phone"]);
   }
 }
+
+class UserRoles {
+  static const String shopAttendant = "Shop Attendant";
+  static const String fabricCutter = "Fabric Cutter";
+  static const String tailor = "Tailor";
+  static const String finisher = "Finisher";
+  static const String specialMachineHandler = "Special Machine Handler";
+}
+
+final List<String> userRoles = [
+  UserRoles.shopAttendant,
+  UserRoles.fabricCutter,
+  UserRoles.tailor,
+  UserRoles.finisher,
+  UserRoles.specialMachineHandler
+];

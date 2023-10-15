@@ -27,9 +27,10 @@ class _NFCPaymentScreenState extends State<NFCPaymentScreen> {
   bool loading = false;
   bool paymentProcessing = false;
   TextEditingController phoneController = TextEditingController();
+  String phoneNumber = "";
 
   void processMPesaTransaction() async {
-    if (phoneController.text.isNotEmpty) {
+    if (phoneNumber.isNotEmpty) {
       Navigator.pop(context);
 
       setState(() {
@@ -38,7 +39,7 @@ class _NFCPaymentScreenState extends State<NFCPaymentScreen> {
 
       var res = await MPesa().processTransaction(
           amount: widget.totalAmount.toString(),
-          phone: phoneController.text.trim());
+          phone: phoneNumber.split("+").last.trim());
 
       var actualResult = json.decode(res);
 
@@ -65,7 +66,7 @@ class _NFCPaymentScreenState extends State<NFCPaymentScreen> {
   }
 
   void processPaypalTransaction() async {
-    if (phoneController.text.isNotEmpty) {
+    if (phoneNumber.isNotEmpty) {
       Navigator.pop(context);
 
       setState(() {
@@ -76,16 +77,16 @@ class _NFCPaymentScreenState extends State<NFCPaymentScreen> {
 
       switch (widget.page) {
         case "pos_cart":
-          res = await PayPal().posPayment(
-              widget.data, widget.totalAmount!, phoneController.text.trim());
+          res = await PayPal().posPayment(widget.data, widget.totalAmount!,
+              phoneNumber.split("+").last.trim());
           break;
         case "ecommerce":
-          res = await PayPal().ecommercePayment(
-              widget.data, widget.totalAmount!, phoneController.text.trim());
+          res = await PayPal().ecommercePayment(widget.data,
+              widget.totalAmount!, phoneNumber.split("+").last.trim());
           break;
         case "uniform":
-          res = await PayPal().uniformPayment(
-              widget.data, widget.totalAmount!, phoneController.text.trim());
+          res = await PayPal().uniformPayment(widget.data, widget.totalAmount!,
+              phoneNumber.split("+").last.trim());
           break;
       }
 
@@ -116,6 +117,7 @@ class _NFCPaymentScreenState extends State<NFCPaymentScreen> {
   promptPaypalPayment() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
         return CustomPopup(
           title: "Client's Phone",
@@ -133,11 +135,15 @@ class _NFCPaymentScreenState extends State<NFCPaymentScreen> {
           body: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomTextField(
+              CustomPhoneField(
                 controller: phoneController,
-                hintText: "2547XXXX",
-                title: "Phone Number",
-                inputType: TextInputType.phone,
+                onChanged: (phone) {
+                  setState(() {
+                    phoneNumber = phone.completeNumber;
+                  });
+
+                  this.setState(() {});
+                },
               ),
             ],
           ),
@@ -149,6 +155,7 @@ class _NFCPaymentScreenState extends State<NFCPaymentScreen> {
   void promptMPesaPayment() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
         return CustomPopup(
           title: "Your Phone",
@@ -166,11 +173,15 @@ class _NFCPaymentScreenState extends State<NFCPaymentScreen> {
           body: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomTextField(
+              CustomPhoneField(
                 controller: phoneController,
-                hintText: "2547XXXX",
-                title: "Phone Number",
-                inputType: TextInputType.phone,
+                onChanged: (phone) {
+                  setState(() {
+                    phoneNumber = phone.completeNumber;
+                  });
+
+                  this.setState(() {});
+                },
               ),
             ],
           ),

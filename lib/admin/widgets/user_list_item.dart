@@ -11,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/uploader.dart';
+import '../../common_functions/user_role_solver.dart';
 import '../../config.dart';
 import '../../widgets/custom_popup.dart';
 import '../../widgets/custom_textfield.dart';
@@ -30,11 +31,11 @@ class _UserListItemState extends State<UserListItem> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController idController = TextEditingController();
   TextEditingController advanceController = TextEditingController();
-  bool giveAdvance = false;
-  bool clearAdvance = false;
-  bool paying = false;
+  bool updating = false;
+  bool deleting = false;
   PlatformFile? file;
-  String userRole = "Shop Attendant";
+  List<dynamic> selectedUserRoles = [];
+  String phoneNumber = "";
 
   @override
   void initState() {
@@ -42,9 +43,11 @@ class _UserListItemState extends State<UserListItem> {
     setState(() {
       nameController.text = widget.user.username!;
       emailController.text = widget.user.email!;
-      phoneController.text = widget.user.phone!;
+      phoneController.text = widget.user.phone!.substring(3);
+      phoneNumber = "+${widget.user.phone!}";
       idController.text = widget.user.idNumber!;
-      userRole = widget.user.userRole!.split("_").join(" ").toTitleCase();
+      selectedUserRoles =
+          widget.user.userRole!.map((e) => toHumanReadable(e)).toList();
     });
   }
 
@@ -59,6 +62,7 @@ class _UserListItemState extends State<UserListItem> {
 
       String res = await showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (_) {
             return CustomPopup(
               title: "Update Photo",
@@ -100,12 +104,14 @@ class _UserListItemState extends State<UserListItem> {
   }
 
   void updateUserInfo() async {
-    // Navigator.pop(context);
-
     if (nameController.text.isNotEmpty &&
-        emailController.text.isNotEmpty &&
-        phoneController.text.isNotEmpty &&
+        phoneNumber.isNotEmpty &&
+        selectedUserRoles.isNotEmpty &&
         idController.text.isNotEmpty) {
+      setState(() {
+        updating = true;
+      });
+
       try {
         await FirebaseFirestore.instance
             .collection("users")
@@ -113,17 +119,22 @@ class _UserListItemState extends State<UserListItem> {
             .update({
           "email": emailController.text.trim(),
           "username": nameController.text.trim(),
-          "phone": phoneController.text.trim(),
+          "phone": phoneNumber.split("+").last.trim(),
           "idNumber": idController.text.trim(),
-          "userRole": userRole.toLowerCase().split(" ").join("_")
+          "userRole": selectedUserRoles.map((e) => toCoded(e)).toList()
         });
 
         Fluttertoast.showToast(msg: "Updated Successfully!");
 
-        setState(() {});
+        setState(() {
+          updating = false;
+        });
       } catch (e) {
         print(e.toString());
         Fluttertoast.showToast(msg: "An ERROR Occurred!");
+        setState(() {
+          updating = false;
+        });
       }
     } else {
       Fluttertoast.showToast(msg: "An ERROR Occurred!");
@@ -133,6 +144,7 @@ class _UserListItemState extends State<UserListItem> {
   void promptUserDeletion() async {
     String res = await showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (_) {
           return CustomPopup(
             title: "Delete User",
@@ -146,6 +158,9 @@ class _UserListItemState extends State<UserListItem> {
 
     if (res == "proceed") {
       // Delete user
+      setState(() {
+        deleting = true;
+      });
 
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection("users")
@@ -157,38 +172,12 @@ class _UserListItemState extends State<UserListItem> {
       await UpdateAdminInfo().updateUserCount(widget.user, false);
 
       Fluttertoast.showToast(msg: "Deleted Successfully!");
+
+      setState(() {
+        deleting = false;
+      });
     } else {
       // Do Nothing...
-    }
-  }
-
-  String queryID() {
-    switch (widget.user.userRole) {
-      case "shop_attendant":
-        return "shopAttendant";
-      case "fabric_cutter":
-        return "fabricCutter";
-      case "tailor":
-        return "tailor";
-      case "finisher":
-        return "finisher";
-      default:
-        return widget.user.userRole!;
-    }
-  }
-
-  String getUserRole() {
-    switch (widget.user.userRole) {
-      case "shop_attendant":
-        return "Shop Attendant";
-      case "fabric_cutter":
-        return "Fabric Cutter";
-      case "tailor":
-        return "Tailor";
-      case "finisher":
-        return "Finisher";
-      default:
-        return widget.user.userRole!.toCapitalized();
     }
   }
 
@@ -240,11 +229,13 @@ class _UserListItemState extends State<UserListItem> {
         title: "Email Address",
         inputType: TextInputType.emailAddress,
       ),
-      CustomTextField(
+      CustomPhoneField(
         controller: phoneController,
-        hintText: "2547XXXX",
-        title: "Phone Number",
-        inputType: TextInputType.phone,
+        onChanged: (phone) {
+          setState(() {
+            phoneNumber = phone.completeNumber;
+          });
+        },
       ),
       CustomTextField(
         controller: idController,
@@ -254,28 +245,24 @@ class _UserListItemState extends State<UserListItem> {
       ),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 5.0),
-        child: DropdownSearch<String>(
-          popupProps: const PopupProps.menu(
+        child: DropdownSearch<dynamic>.multiSelection(
+          compareFn: (item1, item2) => item1.toString() == item2.toString(),
+          items: userRoles,
+          popupProps: const PopupPropsMultiSelection.menu(
             showSelectedItems: true,
           ),
-          items: const [
-            "Shop Attendant",
-            "Fabric Cutter",
-            "Tailor",
-            "Finisher"
-          ],
           dropdownDecoratorProps: const DropDownDecoratorProps(
             dropdownSearchDecoration: InputDecoration(
-              labelText: "User Role",
-              hintText: "User Role",
+              labelText: "User Roles",
+              hintText: "User Roles",
             ),
           ),
-          onChanged: (str) {
+          onChanged: (value) {
             setState(() {
-              userRole = str!;
+              selectedUserRoles = value;
             });
           },
-          selectedItem: userRole,
+          selectedItems: selectedUserRoles,
         ),
       ),
       const SizedBox(
@@ -305,31 +292,35 @@ class _UserListItemState extends State<UserListItem> {
             const SizedBox(
               width: 5.0,
             ),
-            TextButton.icon(
-              onPressed: () => updateUserInfo(),
-              icon: const Icon(
-                Icons.edit,
-                color: Colors.green,
-              ),
-              label: const Text(
-                "UPDATE",
-                style: TextStyle(color: Colors.green),
-              ),
-            ),
+            updating
+                ? const Text("Updating...")
+                : TextButton.icon(
+                    onPressed: () => updateUserInfo(),
+                    icon: const Icon(
+                      Icons.edit,
+                      color: Colors.green,
+                    ),
+                    label: const Text(
+                      "UPDATE",
+                      style: TextStyle(color: Colors.green),
+                    ),
+                  ),
             const SizedBox(
               width: 5.0,
             ),
-            TextButton.icon(
-              onPressed: () => promptUserDeletion(),
-              icon: const Icon(
-                Icons.clear_rounded,
-                color: Colors.red,
-              ),
-              label: const Text(
-                "DELETE",
-                style: TextStyle(color: Colors.red),
-              ),
-            )
+            deleting
+                ? const Text("Deleting...")
+                : TextButton.icon(
+                    onPressed: () => promptUserDeletion(),
+                    icon: const Icon(
+                      Icons.clear_rounded,
+                      color: Colors.red,
+                    ),
+                    label: const Text(
+                      "DELETE",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  )
           ],
         ),
       )
@@ -376,36 +367,6 @@ class _UserListItemState extends State<UserListItem> {
     ];
   }
 
-  Color tagColor() {
-    switch (widget.user.userRole) {
-      case "shop_attendant":
-        return Colors.teal;
-      case "fabric_cutter":
-        return Colors.deepOrange;
-      case "tailor":
-        return Colors.blue;
-      case "finisher":
-        return Colors.lime;
-      default:
-        return Colors.teal;
-    }
-  }
-
-  String displayUserRole() {
-    switch (widget.user.userRole) {
-      case "shop_attendant":
-        return "Shop Attendant";
-      case "fabric_cutter":
-        return "Fabric Cutter";
-      case "tailor":
-        return "Tailor";
-      case "finisher":
-        return "Finisher";
-      default:
-        return "User";
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -433,9 +394,17 @@ class _UserListItemState extends State<UserListItem> {
               "+${widget.user.phone!}",
               style: const TextStyle(color: Config.customGrey),
             ),
-            CustomTag(
-              title: displayUserRole(),
-              color: tagColor(),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(
+                    widget.user.userRole!.length,
+                    (index) => CustomTag(
+                          title: toHumanReadable(widget.user.userRole![index]),
+                          color: tagColor(widget.user.userRole![index]),
+                        )),
+              ),
             )
           ],
         ),

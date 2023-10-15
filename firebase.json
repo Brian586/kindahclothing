@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "target": "kindahclothing",
     "public": "build/web",
     "ignore": [
       "firebase.json",

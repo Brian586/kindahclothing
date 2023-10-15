@@ -60,6 +60,7 @@ class _ProductListingItemState extends State<ProductListingItem> {
   void displayProductInfo() async {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) {
         return CustomPopup(
           title: "Edit Product Info",
@@ -121,6 +122,7 @@ class _ProductListingItemState extends State<ProductListingItem> {
   void promptProductDeletion() async {
     String res = await showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (_) {
           return CustomPopup(
             title: "Delete Product",

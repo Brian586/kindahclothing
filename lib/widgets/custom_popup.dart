@@ -49,3 +49,47 @@ class _CustomPopupState extends State<CustomPopup> {
     );
   }
 }
+
+class OptionsPopup extends StatelessWidget {
+  final String? title;
+  final Widget? body;
+  const OptionsPopup({super.key, this.title, this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        title!,
+        style: const TextStyle(
+            color: Config.customGrey, fontWeight: FontWeight.w800),
+      ),
+      content: body,
+    );
+  }
+}
+
+class ErrorPopup extends StatelessWidget {
+  final String? title;
+  final Widget? body;
+  const ErrorPopup({super.key, this.title, this.body});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(
+        title!,
+        style: const TextStyle(
+            color: Config.customGrey, fontWeight: FontWeight.w800),
+      ),
+      content: body,
+      actions: [
+        CustomButton(
+          onPressed: () => Navigator.pop(context),
+          title: "Close",
+          iconData: Icons.error,
+          height: 30.0,
+        )
+      ],
+    );
+  }
+}

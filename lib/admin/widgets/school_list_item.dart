@@ -62,6 +62,7 @@ class _SchoolListItemState extends State<SchoolListItem> {
 
         String res = await showDialog(
             context: context,
+            barrierDismissible: false,
             builder: (_) {
               return CustomPopup(
                 title: "Update Photo",
@@ -108,6 +109,7 @@ class _SchoolListItemState extends State<SchoolListItem> {
 
         String res = await showDialog(
             context: context,
+            barrierDismissible: false,
             builder: (_) {
               return CustomPopup(
                 title: "Update Logo",
@@ -153,6 +155,7 @@ class _SchoolListItemState extends State<SchoolListItem> {
   void promptSchoolDeletion(School school) async {
     String res = await showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (_) {
           return CustomPopup(
             title: "Delete School",

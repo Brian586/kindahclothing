@@ -14,6 +14,7 @@ class UserAppbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Account account = context.watch<AccountProvider>().account;
+    String preferedRole = context.watch<AccountProvider>().preferedRole;
 
     return AppBar(
       flexibleSpace: Container(
@@ -39,8 +40,8 @@ class UserAppbar extends StatelessWidget {
               width: 10.0,
             ),
             InkWell(
-              onTap: () => context
-                  .go("/users/${account.userRole}s/${account.id}/settings"),
+              onTap: () =>
+                  context.go("/users/${preferedRole}s/${account.id}/settings"),
               child: CircleAvatar(
                 backgroundImage: const AssetImage("assets/images/profile.png"),
                 backgroundColor: Colors.white,

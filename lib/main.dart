@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kindah/Ads/ad_state.dart';
 import 'package:kindah/config.dart';
+import 'package:kindah/pages/user_selector.dart';
 import 'package:kindah/providers/account_provider.dart';
 import 'package:kindah/providers/admin_provider.dart';
 import 'package:kindah/providers/category_provider.dart';
@@ -84,9 +85,14 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void displaySplash() async {
-    Timer(const Duration(seconds: 3), () {
-      // Proceed to ecommerce page
-      GoRouter.of(context).go("/home");
+    Timer(const Duration(seconds: 3), () async {
+      // Ask for destination
+      String destination = await Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const UserSelector()));
+
+      // Proceed to destination
+
+      GoRouter.of(context).go(destination);
     });
   }
 
@@ -98,9 +104,12 @@ class _SplashScreenState extends State<SplashScreen> {
       extendBody: true,
       extendBodyBehindAppBar: true,
       body: Center(
-        child: Image.asset(
-          "assets/images/logo.png",
-          width: 300.0,
+        child: Hero(
+          tag: "assets/images/logo.png",
+          child: Image.asset(
+            "assets/images/logo.png",
+            width: 300.0,
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:kindah/common_functions/sort_dates.dart';
 import 'package:kindah/models/order.dart' as template;
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -52,8 +53,9 @@ class _OrderDataCardState extends State<OrderDataCard> {
         .map((e) => OrderGroup(date: e.key, orders: e.value))
         .toList();
 
-    orderGroups.sort((a, b) => a.date!.compareTo(b.date!));
-    return orderGroups.reversed.toList();
+    orderGroups.sort((a, b) => sortDates(a, b));
+
+    return orderGroups.toList();
   }
 
   int getCount(List<template.Order> orders, String type) {

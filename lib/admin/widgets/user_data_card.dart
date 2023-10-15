@@ -1,9 +1,16 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:kindah/common_functions/sort_dates.dart';
+import 'package:kindah/common_functions/user_role_solver.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/models/account.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
+import '../../providers/admin_provider.dart';
+import '../../widgets/custom_tag.dart';
 
 class UserDataCard extends StatefulWidget {
   final List<Account>? accounts;
@@ -14,6 +21,7 @@ class UserDataCard extends StatefulWidget {
 }
 
 class _UserDataCardState extends State<UserDataCard> {
+  int specialMachineHandlers = 0;
   int shopAttendants = 0;
   int fabricCutters = 0;
   int tailors = 0;
@@ -34,12 +42,15 @@ class _UserDataCardState extends State<UserDataCard> {
     tailors = userCount("tailor");
 
     finishers = userCount("finisher");
+
+    specialMachineHandlers =
+        userCount(toCoded(UserRoles.specialMachineHandler));
   }
 
   int userCount(String role) {
     return widget.accounts!
         .where(
-          (account) => account.userRole! == role,
+          (account) => account.userRole!.contains(role),
         )
         .toList()
         .length;
@@ -79,8 +90,9 @@ class _UserDataCardState extends State<UserDataCard> {
         .map((e) => AccountGroup(date: e.key, accounts: e.value))
         .toList();
 
-    accountGroups.sort((a, b) => a.date!.compareTo(b.date!));
-    return accountGroups.reversed.toList();
+    accountGroups.sort((a, b) => sortDates(a, b));
+
+    return accountGroups.toList();
   }
 
   @override
@@ -97,9 +109,26 @@ class _UserDataCardState extends State<UserDataCard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "User Analytics",
-                style: Theme.of(context).textTheme.titleMedium,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "User Analytics",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  InkWell(
+                      onTap: () {
+                        context
+                            .read<AdminProvider>()
+                            .changeDrawerItem("add_users");
+
+                        context.go("/admin/0001/add_users");
+                      },
+                      child: const CustomTag(
+                        title: "Add Users",
+                        color: Config.customBlue,
+                      ))
+                ],
               ),
               const Divider(
                 height: 20.0,
@@ -184,6 +213,15 @@ class _UserDataCardState extends State<UserDataCard> {
                             width: 10.0,
                           ),
                           title: Text("$finishers Finishers"),
+                        ),
+                        ListTile(
+                          leading: Container(
+                            color: Config.customBlue,
+                            height: 10.0,
+                            width: 10.0,
+                          ),
+                          title: Text(
+                              "$specialMachineHandlers Special Machine Handlers"),
                         )
                       ],
                     ),

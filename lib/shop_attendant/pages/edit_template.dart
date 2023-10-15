@@ -456,7 +456,6 @@ class _EditTemplateState extends State<EditTemplate> {
 
                         Navigator.pop(context);
                       }, //context
-                      //.go("/users/${account.userRole}s/${account.id}/home"),
                       icon: const Icon(
                         Icons.arrow_back_ios_rounded,
                         color: Colors.white,

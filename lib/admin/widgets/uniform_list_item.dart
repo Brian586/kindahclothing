@@ -68,6 +68,7 @@ class _UniformListItemState extends State<UniformListItem> {
 
       String res = await showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (_) {
             return CustomPopup(
               title: "Update Photo",
@@ -167,6 +168,7 @@ class _UniformListItemState extends State<UniformListItem> {
   void promptUniformDeletion() async {
     String res = await showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (_) {
           return CustomPopup(
             title: "Delete Uniform",

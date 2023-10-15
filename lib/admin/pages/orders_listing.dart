@@ -6,6 +6,7 @@ import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:kindah/models/order.dart' as template;
 
+import '../../widgets/custom_scrollbar.dart';
 import '../widgets/custom_header.dart';
 
 class OrdersListing extends StatefulWidget {
@@ -17,55 +18,62 @@ class OrdersListing extends StatefulWidget {
 }
 
 class _OrdersListingState extends State<OrdersListing> {
+  final ScrollController _controller = ScrollController();
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          widget.isAdmin
-              ? const CustomHeader(
-                  action: [],
-                )
-              : const UserCustomHeader(
-                  action: [],
-                ),
-          StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance.collection("orders").snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return circularProgress();
-              } else {
-                List<template.Order> orders = [];
-
-                snapshot.data!.docs.forEach((element) {
-                  template.Order order = template.Order.fromDocument(element);
-
-                  orders.add(order);
-                });
-
-                if (orders.isEmpty) {
-                  return const Text("No Available Templates");
+    return CustomScrollBar(
+      controller: _controller,
+      child: SingleChildScrollView(
+        controller: _controller,
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            widget.isAdmin
+                ? const CustomHeader(
+                    action: [],
+                  )
+                : const UserCustomHeader(
+                    action: [],
+                  ),
+            StreamBuilder<QuerySnapshot>(
+              stream:
+                  FirebaseFirestore.instance.collection("orders").snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return circularProgress();
                 } else {
-                  return CustomWrapper(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(orders.length, (index) {
-                          template.Order order = orders[index];
+                  List<template.Order> orders = [];
 
-                          return AdminOrderDesign(order: order);
-                        }),
+                  snapshot.data!.docs.forEach((element) {
+                    template.Order order = template.Order.fromDocument(element);
+
+                    orders.add(order);
+                  });
+
+                  if (orders.isEmpty) {
+                    return const Text("No Available Templates");
+                  } else {
+                    return CustomWrapper(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(orders.length, (index) {
+                            template.Order order = orders[index];
+
+                            return AdminOrderDesign(order: order);
+                          }),
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 }
-              }
-            },
-          )
-        ],
+              },
+            )
+          ],
+        ),
       ),
     );
   }

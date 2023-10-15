@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "kindahclothing"
-  }
+  },
+  "targets": {
+    "kindahclothing": {
+      "hosting": {
+        "kindahclothing": [
+          "kindahclothing"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

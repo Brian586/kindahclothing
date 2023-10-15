@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -27,12 +28,13 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="favicon.png" />
 
   <meta property="og:title" content="Kindah Clothing" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://kindahclothing.com" />
-  <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/kindahclothing.appspot.com/o/App%20Photos%2Ficon.png?alt=media&token=899a5620-8aab-4cb1-ae8f-e1127267579d" />
+  <meta property="og:image"
+    content="https://firebasestorage.googleapis.com/v0/b/kindahclothing.appspot.com/o/App%20Photos%2Ficon.png?alt=media&token=899a5620-8aab-4cb1-ae8f-e1127267579d" />
 
 
   <title>Kindah Clothing</title>
@@ -45,7 +47,9 @@
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
 </head>
+
 <body>
+
 
   <style>
     .lds-ripple-container {
@@ -82,6 +86,7 @@
         height: 0;
         opacity: 0;
       }
+
       4.9% {
         top: 36px;
         left: 36px;
@@ -89,6 +94,7 @@
         height: 0;
         opacity: 0;
       }
+
       5% {
         top: 36px;
         left: 36px;
@@ -96,6 +102,7 @@
         height: 0;
         opacity: 1;
       }
+
       100% {
         top: 0px;
         left: 0px;
@@ -104,13 +111,14 @@
         opacity: 0;
       }
     }
-
   </style>
 
   <div class="lds-ripple-container">
-    <div class="lds-ripple"><div></div><div></div></div>
+    <div class="lds-ripple">
+      <div></div>
+      <div></div>
+    </div>
   </div>
-
 
   <script type="module">
     // Import the functions you need from the SDKs you need
@@ -121,7 +129,7 @@
     import { getAuth } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
-  
+
     // Your web app's Firebase configuration
     // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
@@ -134,7 +142,7 @@
       appId: "1:3440730765:web:07a99ac7848dd219dab8c4",
       measurementId: "G-EYKR8RQCZW",
     };
-  
+
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
@@ -142,14 +150,14 @@
 
 
   <script>
-    window.addEventListener('load', function(ev) {
+    window.addEventListener('load', function (ev) {
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
+        onEntrypointLoaded: function (engineInitializer) {
+          engineInitializer.initializeEngine().then(function (appRunner) {
             appRunner.runApp();
           });
         }
@@ -157,4 +165,5 @@
     });
   </script>
 </body>
+
 </html>

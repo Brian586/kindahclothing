@@ -9,6 +9,7 @@ import '../../config.dart';
 import '../../models/admin.dart';
 import '../../providers/admin_provider.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_textfield.dart';
 import '../../widgets/custom_wrapper.dart';
 import '../widgets/custom_header.dart';
@@ -21,10 +22,12 @@ class AdminSettings extends StatefulWidget {
 }
 
 class _AdminSettingsState extends State<AdminSettings> {
+  final ScrollController _controller = ScrollController();
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   bool loading = false;
+  String phoneNumber = "";
 
   void updateAdminInfo(Admin admin) async {
     setState(() {
@@ -37,7 +40,7 @@ class _AdminSettingsState extends State<AdminSettings> {
           .doc(admin.id)
           .update({
         "username": nameController.text.trim(),
-        "phone": phoneController.text.trim(),
+        "phone": phoneNumber.split("+").last.trim(),
         "email": emailController.text.trim()
       });
 
@@ -62,84 +65,91 @@ class _AdminSettingsState extends State<AdminSettings> {
     Admin admin = context.watch<AdminProvider>().admin;
     nameController.text = admin.username!;
     emailController.text = admin.email!;
-    phoneController.text = admin.phone!;
+    phoneNumber = "+${admin.phone!}";
+    phoneController.text = admin.phone!.substring(3);
 
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CustomHeader(
-            action: [
-              CustomButton(
-                title: "Logout",
-                iconData: Icons.logout_outlined,
-                height: 30.0,
-                onPressed: () {
-                  context.go("/home");
-                },
-              )
-            ],
-          ),
-          loading
-              ? circularProgress()
-              : Align(
-                  alignment: Alignment.topLeft,
-                  child: CustomWrapper(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Fields marked * are Required",
-                            style: TextStyle(
-                                fontSize: 12.0, color: Config.customGrey),
-                          ),
-                          CustomTextField(
-                            controller: nameController,
-                            hintText: "Username",
-                            title: "Username *",
-                            inputType: TextInputType.name,
-                          ),
-                          CustomTextField(
-                            controller: emailController,
-                            hintText: "example@domain.com",
-                            title: "Email *",
-                            inputType: TextInputType.emailAddress,
-                          ),
-                          CustomTextField(
-                            controller: phoneController,
-                            hintText: "(2547XXXXX)",
-                            title: "Phone (2547XXXXX) *",
-                            inputType: TextInputType.number,
-                          ),
-                          const SizedBox(
-                            height: 30.0,
-                          ),
-                          CustomButton(
-                            title: "Update",
-                            iconData: Icons.done_rounded,
-                            onPressed: () {
-                              if (nameController.text.isNotEmpty &&
-                                  phoneController.text.isNotEmpty) {
-                                updateAdminInfo(admin);
-                              } else {
-                                Fluttertoast.showToast(
-                                    msg: "Fill in the required fields");
-                              }
-                            },
-                          ),
-                          const SizedBox(
-                            height: 50.0,
-                          )
-                        ],
+    return CustomScrollBar(
+      controller: _controller,
+      child: SingleChildScrollView(
+        controller: _controller,
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CustomHeader(
+              action: [
+                CustomButton(
+                  title: "Logout",
+                  iconData: Icons.logout_outlined,
+                  height: 30.0,
+                  onPressed: () {
+                    context.go("/");
+                  },
+                )
+              ],
+            ),
+            loading
+                ? circularProgress()
+                : Align(
+                    alignment: Alignment.topLeft,
+                    child: CustomWrapper(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Fields marked * are Required",
+                              style: TextStyle(
+                                  fontSize: 12.0, color: Config.customGrey),
+                            ),
+                            CustomTextField(
+                              controller: nameController,
+                              hintText: "Username",
+                              title: "Username *",
+                              inputType: TextInputType.name,
+                            ),
+                            CustomTextField(
+                              controller: emailController,
+                              hintText: "example@domain.com",
+                              title: "Email *",
+                              inputType: TextInputType.emailAddress,
+                            ),
+                            CustomPhoneField(
+                              controller: phoneController,
+                              onChanged: (phone) {
+                                setState(() {
+                                  phoneNumber = phone.completeNumber;
+                                });
+                              },
+                            ),
+                            const SizedBox(
+                              height: 30.0,
+                            ),
+                            CustomButton(
+                              title: "Update",
+                              iconData: Icons.done_rounded,
+                              onPressed: () {
+                                if (nameController.text.isNotEmpty &&
+                                    phoneNumber.isNotEmpty) {
+                                  updateAdminInfo(admin);
+                                } else {
+                                  Fluttertoast.showToast(
+                                      msg: "Fill in the required fields");
+                                }
+                              },
+                            ),
+                            const SizedBox(
+                              height: 50.0,
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                )
-        ],
+                  )
+          ],
+        ),
       ),
     );
   }

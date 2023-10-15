@@ -73,7 +73,7 @@ class _AddTemplateState extends State<AddTemplate> {
   }
 
   void authorizePayment(BuildContext context, List<Uniform> chosenUniforms,
-      double totalAmount, Account account) async {
+      double totalAmount, Account account, String preferedRole) async {
     try {
       String data = Uniform.encode(chosenUniforms);
       // Display payment screen
@@ -154,8 +154,7 @@ class _AddTemplateState extends State<AddTemplate> {
                       text: "Payment Successful!",
                     )));
 
-        GoRouter.of(context)
-            .go("/users/${account.userRole}s/${account.id}/home");
+        GoRouter.of(context).go("/users/${preferedRole}s/${account.id}/home");
 
         Provider.of<UniformProvider>(context, listen: false).clearChosenList();
 
@@ -220,8 +219,8 @@ class _AddTemplateState extends State<AddTemplate> {
     );
   }
 
-  Widget buildBody(
-      Account account, double totalAmount, List<Uniform> chosenUniforms) {
+  Widget buildBody(Account account, double totalAmount,
+      List<Uniform> chosenUniforms, String preferedRole) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: CustomWrapper(
@@ -372,8 +371,8 @@ class _AddTemplateState extends State<AddTemplate> {
                       classController.text.isNotEmpty &&
                       selectedSchool != null) {
                     // Proceed to pay
-                    authorizePayment(
-                        context, chosenUniforms, totalAmount, account);
+                    authorizePayment(context, chosenUniforms, totalAmount,
+                        account, preferedRole);
                   } else {
                     Fluttertoast.showToast(msg: "Fill the required fields");
                   }
@@ -391,8 +390,8 @@ class _AddTemplateState extends State<AddTemplate> {
     );
   }
 
-  Widget buildDesktop(
-      Account account, double totalAmount, List<Uniform> chosenUniforms) {
+  Widget buildDesktop(Account account, double totalAmount,
+      List<Uniform> chosenUniforms, String preferedRole) {
     return Row(
       children: [
         Expanded(
@@ -403,7 +402,8 @@ class _AddTemplateState extends State<AddTemplate> {
           flex: 4,
           child: Align(
               alignment: Alignment.topLeft,
-              child: buildBody(account, totalAmount, chosenUniforms)),
+              child: buildBody(
+                  account, totalAmount, chosenUniforms, preferedRole)),
         ),
       ],
     );
@@ -413,6 +413,7 @@ class _AddTemplateState extends State<AddTemplate> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     Account account = context.watch<AccountProvider>().account;
+    String preferedRole = context.watch<AccountProvider>().preferedRole;
     double totalAmount = context.watch<UniformProvider>().totalAmount;
     List<Uniform> chosenUniforms =
         context.watch<UniformProvider>().chosenUniforms;
@@ -437,8 +438,8 @@ class _AddTemplateState extends State<AddTemplate> {
                       onPressed: () {
                         context.read<UniformProvider>().clearChosenList();
 
-                        context.go(
-                            "/users/${account.userRole}s/${account.id}/home");
+                        context
+                            .go("/users/${preferedRole}s/${account.id}/home");
                       },
                       icon: const Icon(
                         Icons.arrow_back_ios_rounded,
@@ -453,8 +454,10 @@ class _AddTemplateState extends State<AddTemplate> {
                   ),
                 ),
                 body: isMobile
-                    ? buildBody(account, totalAmount, chosenUniforms)
-                    : buildDesktop(account, totalAmount, chosenUniforms),
+                    ? buildBody(
+                        account, totalAmount, chosenUniforms, preferedRole)
+                    : buildDesktop(
+                        account, totalAmount, chosenUniforms, preferedRole),
               );
             },
           );

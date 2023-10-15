@@ -7,6 +7,7 @@ import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 
 import '../../config.dart';
 import '../../widgets/custom_button.dart';
+import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_wrapper.dart';
 import '../../widgets/progress_widget.dart';
 import '../widgets/add_advance.dart';
@@ -21,118 +22,123 @@ class AdvancePaymentsListing extends StatefulWidget {
 }
 
 class _AdvancePaymentsListingState extends State<AdvancePaymentsListing> {
+  final ScrollController _controller = ScrollController();
   bool addAdvance = false;
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          widget.isAdmin
-              ? CustomHeader(
-                  action: [
-                    addAdvance
-                        ? TextButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                addAdvance = false;
-                              });
-                            },
-                            icon: const Icon(
-                              Icons.clear_rounded,
-                              color: Config.customGrey,
-                            ),
-                            label: const Text(
-                              "Close",
-                              style: TextStyle(color: Config.customGrey),
-                            ))
-                        : CustomButton(
-                            title: "Add Advance Payment",
-                            iconData: Icons.add,
-                            height: 30.0,
-                            onPressed: () {
-                              setState(() {
-                                addAdvance = true;
-                              });
-                            },
-                          )
-                  ],
-                )
-              : UserCustomHeader(
-                  action: [
-                    addAdvance
-                        ? TextButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                addAdvance = false;
-                              });
-                            },
-                            icon: const Icon(
-                              Icons.clear_rounded,
-                              color: Config.customGrey,
-                            ),
-                            label: const Text(
-                              "Close",
-                              style: TextStyle(color: Config.customGrey),
-                            ))
-                        : CustomButton(
-                            title: "Add Advance Payment",
-                            iconData: Icons.add,
-                            height: 30.0,
-                            onPressed: () {
-                              setState(() {
-                                addAdvance = true;
-                              });
-                            },
-                          )
-                  ],
-                ),
-          addAdvance ? const AddAdvance() : const SizedBox(),
-          Align(
-            alignment: Alignment.topLeft,
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection("advance_payments")
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return circularProgress();
-                } else {
-                  List<AdvancePayment> advancePayments = [];
-
-                  snapshot.data!.docs.forEach((element) {
-                    AdvancePayment payment =
-                        AdvancePayment.fromDocument(element);
-
-                    advancePayments.add(payment);
-                  });
-
-                  if (advancePayments.isEmpty) {
-                    return const Center(
-                      child: Text("No Payments Available"),
-                    );
+    return CustomScrollBar(
+      controller: _controller,
+      child: SingleChildScrollView(
+        controller: _controller,
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            widget.isAdmin
+                ? CustomHeader(
+                    action: [
+                      addAdvance
+                          ? TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  addAdvance = false;
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.clear_rounded,
+                                color: Config.customGrey,
+                              ),
+                              label: const Text(
+                                "Close",
+                                style: TextStyle(color: Config.customGrey),
+                              ))
+                          : CustomButton(
+                              title: "Add Advance Payment",
+                              iconData: Icons.add,
+                              height: 30.0,
+                              onPressed: () {
+                                setState(() {
+                                  addAdvance = true;
+                                });
+                              },
+                            )
+                    ],
+                  )
+                : UserCustomHeader(
+                    action: [
+                      addAdvance
+                          ? TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  addAdvance = false;
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.clear_rounded,
+                                color: Config.customGrey,
+                              ),
+                              label: const Text(
+                                "Close",
+                                style: TextStyle(color: Config.customGrey),
+                              ))
+                          : CustomButton(
+                              title: "Add Advance Payment",
+                              iconData: Icons.add,
+                              height: 30.0,
+                              onPressed: () {
+                                setState(() {
+                                  addAdvance = true;
+                                });
+                              },
+                            )
+                    ],
+                  ),
+            addAdvance ? const AddAdvance() : const SizedBox(),
+            Align(
+              alignment: Alignment.topLeft,
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection("advance_payments")
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return circularProgress();
                   } else {
-                    return CustomWrapper(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children:
-                            List.generate(advancePayments.length, (index) {
-                          AdvancePayment payment = advancePayments[index];
+                    List<AdvancePayment> advancePayments = [];
 
-                          return AdvanceListItem(
-                            advancePayment: payment,
-                          );
-                        }),
-                      ),
-                    );
+                    snapshot.data!.docs.forEach((element) {
+                      AdvancePayment payment =
+                          AdvancePayment.fromDocument(element);
+
+                      advancePayments.add(payment);
+                    });
+
+                    if (advancePayments.isEmpty) {
+                      return const Center(
+                        child: Text("No Payments Available"),
+                      );
+                    } else {
+                      return CustomWrapper(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children:
+                              List.generate(advancePayments.length, (index) {
+                            AdvancePayment payment = advancePayments[index];
+
+                            return AdvanceListItem(
+                              advancePayment: payment,
+                            );
+                          }),
+                        ),
+                      );
+                    }
                   }
-                }
-              },
-            ),
-          )
-        ],
+                },
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

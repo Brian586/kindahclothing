@@ -10,9 +10,9 @@ import 'package:kindah/widgets/progress_widget.dart';
 import 'package:kindah/models/order.dart' as template;
 import 'package:responsive_builder/responsive_builder.dart';
 
+import '../../common_functions/payment_functions.dart';
 import '../../config.dart';
 import '../../widgets/custom_popup.dart';
-import '../../widgets/custom_textfield.dart';
 
 class PaymentListItem extends StatefulWidget {
   final UserPayment? payment;
@@ -26,27 +26,13 @@ class _PaymentListItemState extends State<PaymentListItem> {
   bool paying = false;
   bool clearAdvance = false;
   bool isExpanded = false;
-  TextEditingController advanceController = TextEditingController();
-
-  String filterUserRole() {
-    switch (widget.payment!.user!["userRole"]) {
-      case "shop_attendant":
-        return "Shop Attendant";
-      case "fabric_cutter":
-        return "Fabric Cutter";
-      case "tailor":
-        return "Tailor";
-      case "finisher":
-        return "Finisher";
-      default:
-        return "Tailor";
-    }
-  }
+  // TextEditingController advanceController = TextEditingController();
 
   void payUser(double amount, double advanceAmount) async {
     if (amount > 0.0) {
       String res = await showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (_) {
             return CustomPopup(
               title: "Pay User",
@@ -79,7 +65,7 @@ class _PaymentListItemState extends State<PaymentListItem> {
 
         // Check if there is "pending" advance
         if (advanceAmount > 0.0) {
-          await clearAdvancePayment(false);
+          await clearAdvancePayment(false, 0, widget.payment!.user!["id"]);
         }
 
         Fluttertoast.showToast(msg: "Payment Successful!");
@@ -92,121 +78,6 @@ class _PaymentListItemState extends State<PaymentListItem> {
       }
     } else {
       Fluttertoast.showToast(msg: "Payment Error!");
-    }
-  }
-
-  Future<void> clearAdvancePayment(bool isPartial) async {
-    if (isPartial) {
-      double paidAmount = int.parse(advanceController.text.trim()).toDouble();
-
-      // Get the pending advance payment
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-          .collection("advance_payments")
-          .where("user.id", isEqualTo: widget.payment!.user!["id"])
-          .where("status", isEqualTo: "pending")
-          .get();
-
-      if (querySnapshot.docs.isNotEmpty) {
-        // If documents exist
-        // Definately its just one so we update it
-
-        AdvancePayment advancePayment =
-            AdvancePayment.fromDocument(querySnapshot.docs[0]);
-
-        double balance = advancePayment.amount! - paidAmount;
-
-        // Update balance for User
-        await FirebaseFirestore.instance
-            .collection("users")
-            .doc(widget.payment!.user!["id"])
-            .collection("advance_payments")
-            .doc(querySnapshot.docs[0].id)
-            .update({
-          "amount": balance,
-        });
-
-        // Update balance globally
-        await querySnapshot.docs[0].reference.update({
-          "amount": balance,
-        });
-      }
-    } else {
-      // Clear for User
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(widget.payment!.user!["id"])
-          .collection("advance_payments")
-          .where("status", isEqualTo: "pending")
-          .get()
-          .then((querySnapshot) async {
-        if (querySnapshot.docs.isNotEmpty) {
-          querySnapshot.docs.forEach((element) async {
-            await element.reference.update({"status": "cleared"});
-          });
-        }
-      });
-
-      // Clear globally
-      await FirebaseFirestore.instance
-          .collection("advance_payments")
-          .where("user.id", isEqualTo: widget.payment!.user!["id"])
-          .where("status", isEqualTo: "pending")
-          .get()
-          .then((querySnapshot) async {
-        if (querySnapshot.docs.isNotEmpty) {
-          querySnapshot.docs.forEach((element) async {
-            await element.reference.update({"status": "cleared"});
-          });
-        }
-      });
-    }
-  }
-
-  void promptClearAdvancePayments() async {
-    String res = await showDialog(
-        context: context,
-        builder: (_) {
-          return CustomPopup(
-            title: "Clear Advance",
-            onAccepted: () {
-              if (advanceController.text.isNotEmpty) {
-                Navigator.pop(context, "proceed");
-              } else {
-                Fluttertoast.showToast(msg: "Please enter amount");
-              }
-            },
-            onCancel: () => Navigator.pop(context, "cancelled"),
-            acceptTitle: "Proceed",
-            body: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                    "Do you wish to clear advance payments for ${widget.payment!.user!["username"]}? Enter the amount below."),
-                CustomTextField(
-                  controller: advanceController,
-                  hintText: "Ksh 0.00",
-                  title: "Amount (Ksh) *",
-                  inputType: TextInputType.number,
-                ),
-              ],
-            ),
-          );
-        });
-
-    if (res == "proceed" && advanceController.text.isNotEmpty) {
-      setState(() {
-        clearAdvance = true;
-      });
-
-      await clearAdvancePayment(true);
-
-      Fluttertoast.showToast(msg: "Advance Payments cleared successfully!");
-
-      setState(() {
-        clearAdvance = false;
-      });
-    } else {
-      Fluttertoast.showToast(msg: "Cancelled");
     }
   }
 
@@ -273,7 +144,51 @@ class _PaymentListItemState extends State<PaymentListItem> {
     );
   }
 
-  Widget displayAdvancePayments(double advanceTotal) {
+  Widget displayInstallmentsInfo(List<AdvancePayment> unpaidAdvances) {
+    String installmentPeriod = unpaidAdvances[0].installmentPeriod!;
+    int installmentCount = unpaidAdvances[0].installmentCount!;
+    double installmentAmount = unpaidAdvances[0].amount! / installmentCount;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Installment period: $installmentPeriod",
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(
+          height: 10.0,
+        ),
+        Text(
+          "Number of Installments: $installmentCount",
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(
+          height: 10.0,
+        ),
+        CustomTag(
+          title: "Amount: Ksh $installmentAmount",
+          color: Colors.deepOrange,
+        )
+      ],
+    );
+  }
+
+  void proceedToClearAdvance(List<AdvancePayment> unpaidAdvances) async {
+    setState(() {
+      clearAdvance = true;
+    });
+
+    await promptClearAdvancePayments(context, unpaidAdvances);
+
+    setState(() {
+      clearAdvance = false;
+    });
+  }
+
+  Widget displayAdvancePayments(
+      List<AdvancePayment> unpaidAdvances, double advanceTotal) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       elevation: 0.0,
@@ -296,12 +211,15 @@ class _PaymentListItemState extends State<PaymentListItem> {
             const SizedBox(
               height: 10.0,
             ),
+            unpaidAdvances.isNotEmpty
+                ? displayInstallmentsInfo(unpaidAdvances)
+                : const SizedBox(),
             clearAdvance
                 ? const Text("Loading...")
                 : advanceTotal < 1.0
                     ? const SizedBox()
                     : InkWell(
-                        onTap: () => promptClearAdvancePayments(),
+                        onTap: () => proceedToClearAdvance(unpaidAdvances),
                         child: Card(
                           elevation: 0.0,
                           color: Colors.deepOrange.withOpacity(0.1),
@@ -320,7 +238,7 @@ class _PaymentListItemState extends State<PaymentListItem> {
                         ),
                       ),
             const SizedBox(
-              height: 30.0,
+              height: 20.0,
             ),
           ],
         ),
@@ -462,7 +380,7 @@ class _PaymentListItemState extends State<PaymentListItem> {
     );
   }
 
-  Widget displayPaymentAndAdvanceCards(
+  Widget displayPaymentAndAdvanceCards(List<AdvancePayment> unpaidAdvances,
       double advanceTotal, Tariff currentTariff) {
     return ResponsiveBuilder(
       builder: (context, sizingInformation) {
@@ -476,7 +394,7 @@ class _PaymentListItemState extends State<PaymentListItem> {
                 children: [
                   displayPayCard(
                       widget.payment!.orders!, currentTariff, advanceTotal),
-                  displayAdvancePayments(advanceTotal)
+                  displayAdvancePayments(unpaidAdvances, advanceTotal)
                 ],
               )
             : Row(
@@ -490,7 +408,7 @@ class _PaymentListItemState extends State<PaymentListItem> {
                   ),
                   Expanded(
                     flex: 1,
-                    child: displayAdvancePayments(advanceTotal),
+                    child: displayAdvancePayments(unpaidAdvances, advanceTotal),
                   )
                 ],
               );
@@ -591,7 +509,7 @@ class _PaymentListItemState extends State<PaymentListItem> {
                       ),
                       children: [
                         displayPaymentAndAdvanceCards(
-                            advanceTotal, currentTariff),
+                            advancePayments, advanceTotal, currentTariff),
                         Text(
                           pending ? "Unpaid Orders" : "Paid Orders",
                           style: const TextStyle(fontWeight: FontWeight.w600),

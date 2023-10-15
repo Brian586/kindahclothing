@@ -28,29 +28,38 @@ class UpdateAdminInfo {
     int fabricCount = admin.fabricCutters!;
     int shopAttendantsCount = admin.shopAttendants!;
     int finisherCount = admin.finishers!;
+    int specialMachineHandler = admin.specialMachineHandler!;
 
-    switch (account.userRole) {
-      case "tailor":
-        await updateAdminCount({
-          "tailors": isAdd ? tailorCount + 1 : tailorCount - 1,
-        });
-        break;
-      case "fabric_cutter":
-        await updateAdminCount({
-          "fabricCutters": isAdd ? fabricCount + 1 : fabricCount - 1,
-        });
-        break;
-      case "shop_attendant":
-        await updateAdminCount({
-          "shopAttendants":
-              isAdd ? shopAttendantsCount + 1 : shopAttendantsCount - 1,
-        });
-        break;
-      case "finisher":
-        await updateAdminCount({
-          "finishers": isAdd ? finisherCount + 1 : finisherCount - 1,
-        });
-        break;
+    for (var role in account.userRole!) {
+      switch (role) {
+        case "tailor":
+          await updateAdminCount({
+            "tailors": isAdd ? tailorCount + 1 : tailorCount - 1,
+          });
+          break;
+        case "fabric_cutter":
+          await updateAdminCount({
+            "fabricCutters": isAdd ? fabricCount + 1 : fabricCount - 1,
+          });
+          break;
+        case "shop_attendant":
+          await updateAdminCount({
+            "shopAttendants":
+                isAdd ? shopAttendantsCount + 1 : shopAttendantsCount - 1,
+          });
+          break;
+        case "finisher":
+          await updateAdminCount({
+            "finishers": isAdd ? finisherCount + 1 : finisherCount - 1,
+          });
+          break;
+        case "special_machine_handler":
+          await updateAdminCount({
+            "specialMachineHandler":
+                isAdd ? specialMachineHandler + 1 : specialMachineHandler - 1
+          });
+          break;
+      }
     }
   }
 
