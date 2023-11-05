@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/common_functions/load_json.dart';
 import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/models/custom_location.dart';
@@ -12,6 +12,7 @@ import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/uploader.dart';
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_textfield.dart';
@@ -100,9 +101,8 @@ class _AddSchoolsState extends State<AddSchools> {
 
       await UpdateAdminInfo().updateSchoolCount(school, true);
 
-      Fluttertoast.showToast(
-          msg:
-              "${nameController.text.trim()} added to the database successfully!");
+      showCustomToast(
+          "${nameController.text.trim()} added to the database successfully!");
 
       setState(() {
         uniformFile = null;
@@ -116,7 +116,9 @@ class _AddSchoolsState extends State<AddSchools> {
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "Error saving data :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("Error saving data :(");
 
       setState(() {
         loading = false;
@@ -427,8 +429,8 @@ class _AddSchoolsState extends State<AddSchools> {
                                     countryController.text.isNotEmpty) {
                                   saveSchoolToFirestore();
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Fill in the required fields");
+                                  showCustomToast(
+                                      "Fill in the required fields");
                                 }
                               },
                             ),

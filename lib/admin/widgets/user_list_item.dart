@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/admin/pages/access_rights_page.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/models/account.dart';
 import 'package:kindah/widgets/custom_tag.dart';
@@ -13,6 +13,7 @@ import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/uploader.dart';
 import '../../common_functions/user_role_solver.dart';
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_popup.dart';
 import '../../widgets/custom_textfield.dart';
 
@@ -86,19 +87,21 @@ class _UserListItemState extends State<UserListItem> {
               .doc(widget.user.id!)
               .update({"photoUrl": downloadUrl});
 
-          Fluttertoast.showToast(msg: "Updated Photo");
+          showCustomToast("Updated Photo");
 
           setState(() {});
         } catch (e) {
           print(e.toString());
 
-          Fluttertoast.showToast(msg: "An Error Occurred");
+          showErrorDialog(context, e.toString());
+
+          showCustomToast("An Error Occurred");
         }
       } else {
         setState(() {
           file = null;
         });
-        Fluttertoast.showToast(msg: "Cancelled");
+        showCustomToast("Cancelled");
       }
     }
   }
@@ -124,20 +127,23 @@ class _UserListItemState extends State<UserListItem> {
           "userRole": selectedUserRoles.map((e) => toCoded(e)).toList()
         });
 
-        Fluttertoast.showToast(msg: "Updated Successfully!");
+        showCustomToast("Updated Successfully!");
 
         setState(() {
           updating = false;
         });
       } catch (e) {
         print(e.toString());
-        Fluttertoast.showToast(msg: "An ERROR Occurred!");
+
+        showErrorDialog(context, e.toString());
+
+        showCustomToast("An ERROR Occurred!");
         setState(() {
           updating = false;
         });
       }
     } else {
-      Fluttertoast.showToast(msg: "An ERROR Occurred!");
+      showCustomToast("An ERROR Occurred!");
     }
   }
 
@@ -171,7 +177,7 @@ class _UserListItemState extends State<UserListItem> {
 
       await UpdateAdminInfo().updateUserCount(widget.user, false);
 
-      Fluttertoast.showToast(msg: "Deleted Successfully!");
+      showCustomToast("Deleted Successfully!");
 
       setState(() {
         deleting = false;

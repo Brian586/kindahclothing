@@ -10,6 +10,8 @@ class Uniform {
   final String? imageUrl;
   final int? quantity;
   final int? timestamp;
+  final String? size;
+  final String? color;
   final List<dynamic>? measurements;
 
   Uniform(
@@ -20,6 +22,8 @@ class Uniform {
       this.imageUrl,
       this.quantity,
       this.timestamp,
+      required this.size,
+      required this.color,
       this.measurements});
 
   Map<String, dynamic> toMap() {
@@ -31,6 +35,8 @@ class Uniform {
       "imageUrl": imageUrl,
       "quantity": quantity,
       "timestamp": timestamp,
+      "size": size,
+      "color": color,
       "measurements": measurements
     };
   }
@@ -44,6 +50,8 @@ class Uniform {
         category: doc["category"],
         quantity: doc["quantity"],
         timestamp: doc["timestamp"],
+        size: doc["size"] ?? "M",
+        color: doc["color"] ?? "",
         measurements: doc["measurements"]);
   }
 
@@ -56,6 +64,8 @@ class Uniform {
         category: doc["category"],
         quantity: doc["quantity"],
         timestamp: doc["timestamp"],
+        size: doc["size"] ?? "M",
+        color: doc["color"] ?? "",
         measurements: doc["measurements"]);
   }
 
@@ -97,5 +107,33 @@ class UniformMeasurement {
         name: json["name"],
         units: json["units"],
         measurement: json["measurement"].toDouble());
+  }
+}
+
+final List<String> uniformSizes = [
+  'XS', // Extra Small
+  'S', // Small
+  'M', // Medium
+  'L', // Large
+  'XL', // Extra Large
+  'XXL', // Extra Extra Large
+];
+
+String sizeMatcher(String size) {
+  switch (size) {
+    case 'XS':
+      return 'Extra Small';
+    case 'S':
+      return 'Small';
+    case 'M':
+      return 'Medium';
+    case 'L':
+      return 'Large';
+    case 'XL':
+      return 'Extra Large';
+    case 'XXL':
+      return 'Extra Extra Large';
+    default:
+      return '';
   }
 }

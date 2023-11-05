@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
+import '../../../dialog/error_dialog.dart';
 import '../../responsive.dart';
 import '../../../config.dart';
 
@@ -123,6 +124,12 @@ class _LoginViewState extends State<LoginView> {
         // );
       } catch (e) {
         print(e.toString());
+
+        showErrorDialog(context, e.toString());
+
+        setState(() {
+          loading = false;
+        });
       }
     } else {
       Fluttertoast.showToast(msg: "User does not exist");

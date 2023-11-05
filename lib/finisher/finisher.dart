@@ -12,6 +12,7 @@ import '../providers/account_provider.dart';
 import '../user_panel/widgets/user_custom_header.dart';
 import '../widgets/custom_scrollbar.dart';
 import '../widgets/custom_wrapper.dart';
+import '../widgets/done_order_data_source.dart';
 import '../widgets/no_data.dart';
 import '../widgets/order_design.dart';
 import '../widgets/progress_widget.dart';
@@ -63,6 +64,7 @@ class _FinisherState extends State<Finisher> {
             const UserCustomHeader(
               action: [],
             ),
+            UserDataGrid(account: account, preferedRole: "finisher"),
             Align(
               alignment: Alignment.topLeft,
               child: CustomWrapper(
@@ -71,13 +73,13 @@ class _FinisherState extends State<Finisher> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
+                          children: [
                             Text(
-                              "Choose Order \nTo Work On",
+                              "Choose Order To Work On",
                               style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   color: Config.customGrey),
@@ -167,14 +169,15 @@ class _FinisherState extends State<Finisher> {
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
-                                      children: const [
+                                      children: [
                                         Text(
                                           "Finished Orders",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              color: Config.customGrey),
+                                          maxLines: 2,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge,
                                         ),
-                                        SizedBox()
+                                        const SizedBox()
                                       ],
                                     ),
                                   ),

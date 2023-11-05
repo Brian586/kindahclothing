@@ -33,6 +33,7 @@ import '../admin/pages/schools_listing.dart';
 import '../admin/pages/uniforms_listing.dart';
 import '../admin/pages/users_listing.dart';
 import '../models/account.dart';
+import '../pages/add_order_record.dart';
 import '../pages/user_intro.dart';
 import '../providers/account_provider.dart';
 import '../widgets/progress_widget.dart';
@@ -75,19 +76,21 @@ class _UserPanelState extends State<UserPanel> {
     Provider.of<AccountProvider>(context, listen: false)
         .setPreferedRole(widget.userRole!);
 
-    if (account.isNew!) {
-      await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => UserIntro(
-                    userType: widget.userRole!,
-                  )));
+    // Bypass if account is new
 
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(widget.userID)
-          .update({"isNew": false});
-    }
+    // if (account.isNew!) {
+    await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => UserIntro(
+                  userType: widget.userRole!,
+                )));
+
+    //   await FirebaseFirestore.instance
+    //       .collection("users")
+    //       .doc(widget.userID)
+    //       .update({"isNew": false});
+    // }
 
     Provider.of<AccountProvider>(context, listen: false).changeAccount(account);
 
@@ -113,10 +116,15 @@ class _UserPanelState extends State<UserPanel> {
     }
   }
 
-  Widget buildUserBody(String preferedRole) {
+  Widget buildUserBody(Account account, String preferedRole) {
     switch (widget.currentTab) {
       case "dashboard":
         return getDash(preferedRole);
+
+      case "add_record":
+        return AddOrderRecord(
+          preferedRole: preferedRole,
+        );
 
       // USERS
       case "add_users":
@@ -188,8 +196,10 @@ class _UserPanelState extends State<UserPanel> {
           isAdmin: false,
         );
       case "add_order":
-        return const AddOrder(
+        return AddOrder(
           isAdmin: false,
+          userID: widget.userID!,
+          userMap: account.toMap(),
         );
       case "edit_orders":
         return const EditOrder(
@@ -222,7 +232,8 @@ class _UserPanelState extends State<UserPanel> {
     }
   }
 
-  Widget buildMobile(BuildContext context, Size size, String preferedRole) {
+  Widget buildMobile(
+      BuildContext context, Size size, Account account, String preferedRole) {
     return Scaffold(
       key: scaffoldKey,
       drawer: const UserPanelDrawer(),
@@ -233,11 +244,12 @@ class _UserPanelState extends State<UserPanel> {
           scaffoldKey: scaffoldKey,
         ),
       ),
-      body: buildUserBody(preferedRole),
+      body: buildUserBody(account, preferedRole),
     );
   }
 
-  Widget buildDesktop(BuildContext context, Size size, String preferedRole) {
+  Widget buildDesktop(
+      BuildContext context, Size size, Account account, String preferedRole) {
     return Scaffold(
       key: scaffoldKey,
       appBar: PreferredSize(
@@ -257,7 +269,7 @@ class _UserPanelState extends State<UserPanel> {
             flex: 4,
             child: Align(
                 alignment: Alignment.topLeft,
-                child: buildUserBody(preferedRole)),
+                child: buildUserBody(account, preferedRole)),
           ),
         ],
       ),
@@ -267,6 +279,7 @@ class _UserPanelState extends State<UserPanel> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    Account account = context.watch<AccountProvider>().account;
     String preferedRole = context.watch<AccountProvider>().preferedRole;
 
     return loading
@@ -277,9 +290,12 @@ class _UserPanelState extends State<UserPanel> {
             ),
           )
         : ScreenTypeLayout.builder(
-            desktop: (context) => buildDesktop(context, size, preferedRole),
-            tablet: (context) => buildMobile(context, size, preferedRole),
-            mobile: (context) => buildMobile(context, size, preferedRole),
+            desktop: (context) =>
+                buildDesktop(context, size, account, preferedRole),
+            tablet: (context) =>
+                buildMobile(context, size, account, preferedRole),
+            mobile: (context) =>
+                buildMobile(context, size, account, preferedRole),
             watch: (p0) => Container(),
           );
   }

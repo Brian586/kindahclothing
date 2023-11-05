@@ -7,11 +7,11 @@ import 'package:provider/provider.dart';
 import 'package:kindah/models/order.dart' as template;
 
 import '../Ads/ad_state.dart';
-import '../config.dart';
 import '../models/account.dart';
 import '../providers/account_provider.dart';
 import '../user_panel/widgets/user_custom_header.dart';
 import '../widgets/custom_scrollbar.dart';
+import '../widgets/done_order_data_source.dart';
 import '../widgets/no_data.dart';
 import '../widgets/order_design.dart';
 import '../widgets/progress_widget.dart';
@@ -62,6 +62,7 @@ class _TailorState extends State<Tailor> {
             const UserCustomHeader(
               action: [],
             ),
+            UserDataGrid(account: account, preferedRole: "tailor"),
             Align(
               alignment: Alignment.topLeft,
               child: Padding(
@@ -74,14 +75,13 @@ class _TailorState extends State<Tailor> {
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
+                          children: [
                             Text(
-                              "Choose Template \nTo Work On",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Config.customGrey),
+                              "Choose Template To Work On",
+                              maxLines: 2,
+                              style: Theme.of(context).textTheme.titleLarge,
                             ),
-                            SizedBox()
+                            const SizedBox()
                           ],
                         ),
                       ),
@@ -166,14 +166,15 @@ class _TailorState extends State<Tailor> {
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
-                                      children: const [
+                                      children: [
                                         Text(
                                           "Completed Orders",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              color: Config.customGrey),
+                                          maxLines: 2,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge,
                                         ),
-                                        SizedBox()
+                                        const SizedBox()
                                       ],
                                     ),
                                   ),

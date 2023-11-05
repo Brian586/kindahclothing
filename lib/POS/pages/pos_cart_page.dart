@@ -13,6 +13,7 @@ import 'package:kindah/widgets/ecomm_appbar.dart';
 import 'package:kindah/widgets/no_data.dart';
 import 'package:provider/provider.dart';
 
+import '../../dialog/error_dialog.dart';
 import '../../pages/payment_screen.dart';
 import '../../pages/payment_successful.dart';
 import '../../providers/product_provider.dart';
@@ -124,6 +125,9 @@ class _POSCartPageState extends State<POSCartPage> {
       }
     } catch (e) {
       print(e.toString());
+
+      showErrorDialog(context, e.toString());
+
       Fluttertoast.showToast(msg: "An ERROR Occurred :(");
       setState(() {
         loading = false;

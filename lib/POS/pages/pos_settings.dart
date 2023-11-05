@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kindah/POS/models/pos_user.dart';
 
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/ecomm_appbar.dart';
 import '../../widgets/progress_widget.dart';
@@ -79,6 +80,9 @@ class _POSSettingsState extends State<POSSettings> {
       });
     } catch (e) {
       print(e.toString());
+
+      showErrorDialog(context, e.toString());
+
       Fluttertoast.showToast(msg: "An ERROR Occurred :(");
 
       setState(() {

@@ -81,7 +81,7 @@ class _ChooseTailorState extends State<ChooseTailor> {
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection("users")
-                .where("userRole", isEqualTo: "tailor")
+                .where("userRole", arrayContains: "tailor")
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {

@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/models/product.dart';
 
 import '../../common_functions/update_admin_info.dart';
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_popup.dart';
 import '../../widgets/custom_textfield.dart';
 
@@ -50,10 +51,13 @@ class _ProductListingItemState extends State<ProductListingItem> {
         "category": selectedCategory,
       });
 
-      Fluttertoast.showToast(msg: "Updated Successfully!");
+      showCustomToast("Updated Successfully!");
     } catch (e) {
       print(e.toString());
-      Fluttertoast.showToast(msg: "An ERROR Occurred!");
+
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occurred!");
     }
   }
 
@@ -146,7 +150,7 @@ class _ProductListingItemState extends State<ProductListingItem> {
 
       await UpdateAdminInfo().updateProductsCount(widget.product, false);
 
-      Fluttertoast.showToast(msg: "Deleted Successfully!");
+      showCustomToast("Deleted Successfully!");
     } else {
       // Do Nothing...
     }

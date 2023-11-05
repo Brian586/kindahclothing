@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
@@ -10,14 +8,13 @@ import 'package:kindah/config.dart';
 import 'package:kindah/models/order.dart' as template;
 import 'package:kindah/models/school.dart';
 import 'package:kindah/models/uniform.dart';
-import 'package:kindah/pages/payment_screen.dart';
-import 'package:kindah/pages/payment_successful.dart';
 import 'package:kindah/providers/uniform_provider.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:kindah/widgets/custom_textfield.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
+import '../../dialog/error_dialog.dart';
 import '../../models/account.dart';
 import '../../providers/account_provider.dart';
 import '../../widgets/custom_wrapper.dart';
@@ -75,24 +72,32 @@ class _AddTemplateState extends State<AddTemplate> {
   void authorizePayment(BuildContext context, List<Uniform> chosenUniforms,
       double totalAmount, Account account, String preferedRole) async {
     try {
-      String data = Uniform.encode(chosenUniforms);
+      // String data = Uniform.encode(chosenUniforms);
       // Display payment screen
 
-      String result = await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentScreen(
-                    totalAmount: totalAmount,
-                    data: data,
-                    page: "uniform",
-                  )));
+      String result = "proceed";
+
+      // String result = await Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => PaymentScreen(
+      //               totalAmount: totalAmount,
+      //               data: data,
+      //               page: "uniform",
+      //             )));
 
       if (result != "cancelled") {
         setState(() {
           loading = true;
         });
 
-        Map<String, dynamic> paymentInfo = json.decode(result);
+        // Map<String, dynamic> paymentInfo = json.decode(result);
+        // Bypass Payment method: assume payment by cash
+        Map<String, dynamic> paymentInfo = {
+          "payment_method": "Cash",
+          "status": "paid",
+          "contact": "254700000000"
+        };
 
         DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
             .collection("order_count")
@@ -143,16 +148,23 @@ class _AddTemplateState extends State<AddTemplate> {
         });
 
         // UPDATE DONE ORDER=========================================
-        await UpdateDoneOrders.updatePendingOrders(account, order.id!);
+        // await UpdateDoneOrders.updatePendingOrders(account, order.id!);
+        await UpdateDoneOrders.updateDoneOrders(
+            chosenUniforms: chosenUniforms,
+            orderId: order.id!,
+            userRole: "shop_attendant",
+            isAdmin: false,
+            userMap: account.toMap(),
+            userID: widget.userID);
 
         Fluttertoast.showToast(msg: "Template Uploaded Successfully!");
 
-        await Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const PaymentSuccessful(
-                      text: "Payment Successful!",
-                    )));
+        // await Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => const PaymentSuccessful(
+        //               text: "Payment Successful!",
+        //             )));
 
         GoRouter.of(context).go("/users/${preferedRole}s/${account.id}/home");
 
@@ -170,11 +182,21 @@ class _AddTemplateState extends State<AddTemplate> {
         });
       } else {
         Fluttertoast.showToast(msg: "Payment has been cancelled :(");
+
+        setState(() {
+          loading = false;
+        });
       }
     } catch (e) {
       print(e.toString());
 
+      showErrorDialog(context, e.toString());
+
       Fluttertoast.showToast(msg: "An ERROR Occured :(");
+
+      setState(() {
+        loading = false;
+      });
     }
   }
 

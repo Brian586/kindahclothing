@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kindah/models/order.dart' as template;
 
 import '../models/account.dart';
+import '../models/uniform.dart';
 import '../models/user_payment.dart';
 
 class UpdateDoneOrders {
@@ -106,6 +107,47 @@ class UpdateDoneOrders {
         Account account = Account.fromJson(order.finisher);
 
         await updatePendingOrders(account, order.id!);
+      }
+    }
+  }
+
+  static Future<void> updateDoneOrders({
+    required List<Uniform> chosenUniforms,
+    required String orderId,
+    required String userRole,
+    required bool isAdmin,
+    required Map<String, dynamic> userMap,
+    required String? userID,
+  }) async {
+    for (Uniform uniform in chosenUniforms) {
+      // Update done orders in database
+      int timestamp = DateTime.now().millisecondsSinceEpoch;
+
+      template.DoneOrder doneOrder = template.DoneOrder(
+        id: timestamp.toString(),
+        orderId: orderId,
+        userRole: userRole,
+        timestamp: timestamp,
+        isPaid: false,
+        type: "from_order",
+        user: userMap,
+        uniform: uniform.toMap(),
+      );
+
+      // Upload globally
+      await FirebaseFirestore.instance
+          .collection("done_orders")
+          .doc(doneOrder.id)
+          .set(doneOrder.toMap());
+
+      // Upload for user if it is User
+      if (!isAdmin) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(userID)
+            .collection("done_orders")
+            .doc(doneOrder.id)
+            .set(doneOrder.toMap());
       }
     }
   }

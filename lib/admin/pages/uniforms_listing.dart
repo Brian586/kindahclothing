@@ -82,6 +82,15 @@ class _UniformsListingState extends State<UniformsListing> {
                         mainAxisSize: MainAxisSize.min,
                         children: List.generate(uniforms.length, (index) {
                           Uniform uniform = uniforms[index];
+                          String uniformMeasurements = "";
+
+                          for (Map<String, dynamic> measurement
+                              in uniform.measurements!) {
+                            uniformMeasurements = uniformMeasurements +
+                                " " +
+                                measurement["name"] +
+                                ",";
+                          }
 
                           return Card(
                             child: Column(
@@ -89,30 +98,47 @@ class _UniformsListingState extends State<UniformsListing> {
                               children: [
                                 Image.network(
                                   uniform.imageUrl!,
-                                  height: 200.0,
+                                  height: 400.0,
                                   width: size.width,
                                   fit: BoxFit.contain,
                                 ),
-                                ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  title: Text(uniform.name!),
-                                  subtitle: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: List.generate(
-                                        uniform.measurements!.length, (index) {
-                                      UniformMeasurement measurement =
-                                          UniformMeasurement.fromJson(
-                                              uniform.measurements![index]);
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: ListTile(
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(uniform.name!),
+                                    subtitle: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          "Measurements (inches)",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w800),
+                                        ),
+                                        Text(uniformMeasurements)
+                                      ],
+                                    ),
+                                    // subtitle: Column(
+                                    //   mainAxisSize: MainAxisSize.min,
+                                    //   crossAxisAlignment:
+                                    //       CrossAxisAlignment.start,
+                                    //   children: List.generate(
+                                    //       uniform.measurements!.length,
+                                    //       (index) {
+                                    //     UniformMeasurement measurement =
+                                    //         UniformMeasurement.fromJson(
+                                    //             uniform.measurements![index]);
 
-                                      return ListTile(
-                                        leading: Text(measurement.symbol!),
-                                        title: Text(measurement.name!),
-                                        subtitle:
-                                            Text("Units: ${measurement.units}"),
-                                      );
-                                    }),
+                                    //     return ListTile(
+                                    //       leading: Text(measurement.symbol!),
+                                    //       title: Text(measurement.name!),
+                                    //       subtitle: Text(
+                                    //           "Units: ${measurement.units}"),
+                                    //     );
+                                    //   }),
+                                    // ),
                                   ),
                                 ),
                               ],

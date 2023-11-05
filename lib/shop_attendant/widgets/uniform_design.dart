@@ -1,9 +1,13 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
+import 'package:kindah/models/custom_color.dart';
 import 'package:kindah/models/uniform.dart';
 import 'package:kindah/providers/uniform_provider.dart';
 import 'package:provider/provider.dart';
+
+import '../../common_functions/color_functions.dart';
 
 class UniformDesign extends StatefulWidget {
   final Uniform? uniform;
@@ -23,7 +27,10 @@ class _UniformDesignState extends State<UniformDesign> {
   bool isSaved = false;
   List<TextEditingController> editingControllers = [];
   TextEditingController quantityController = TextEditingController();
+  TextEditingController colorController = TextEditingController();
   double totalAmount = 0;
+  String selectedSize = "M";
+  String selectedColor = "";
 
   @override
   void initState() {
@@ -61,6 +68,8 @@ class _UniformDesignState extends State<UniformDesign> {
       imageUrl: widget.uniform!.imageUrl,
       quantity: int.parse(quantityController.text.trim()),
       timestamp: widget.uniform!.timestamp,
+      size: selectedSize,
+      color: selectedColor,
       measurements: measurements.map((msmt) => msmt.toMap()).toList(),
     );
 
@@ -73,9 +82,9 @@ class _UniformDesignState extends State<UniformDesign> {
 
       print(chosenUniforms.length);
 
-      Fluttertoast.showToast(msg: "Saved Successfully!");
+      showCustomToast("Saved Successfully!");
     } else {
-      Fluttertoast.showToast(msg: "Already Saved!");
+      showCustomToast("Already Saved!");
     }
   }
 
@@ -95,6 +104,7 @@ class _UniformDesignState extends State<UniformDesign> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     List<Uniform> chosenUniforms =
         context.watch<UniformProvider>().chosenUniforms;
 
@@ -134,9 +144,90 @@ class _UniformDesignState extends State<UniformDesign> {
                 children: [
                   Image.network(
                     widget.uniform!.imageUrl!,
-                    height: 200.0,
-                    width: 200.0,
+                    height: 400.0,
+                    width: size.width,
                     fit: BoxFit.contain,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: DropdownSearch<String>(
+                      popupProps: const PopupProps.menu(
+                          // showSelectedItems: true,
+                          ),
+                      enabled: !isSaved,
+                      items: uniformSizes,
+                      dropdownDecoratorProps: const DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText: "Select Size (Optional)",
+                          hintText: "S, M, L, XL",
+                        ),
+                      ),
+                      onChanged: (str) {
+                        setState(() {
+                          selectedSize = str!;
+                        });
+                      },
+                      // selectedItem: selectedSize,
+                      itemAsString: sizeMatcher,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: DropdownSearch<CustomColor>(
+                      asyncItems: (String? filter) =>
+                          getColors(context, filter!),
+                      clearButtonProps: const ClearButtonProps(isVisible: true),
+                      popupProps: PopupProps.menu(
+                        itemBuilder: (context, customColor, isSelected) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10.0, vertical: 5.0),
+                            child: ListTile(
+                              tileColor: isSelected
+                                  ? hexToColor(customColor.hex!)
+                                  : Colors.transparent,
+                              leading: Container(
+                                height: 30.0,
+                                width: 30.0,
+                                color: hexToColor(customColor.hex!),
+                              ),
+                              title: Text(customColor.name!),
+                              subtitle: Text(customColor.hex!),
+                            ),
+                          );
+                        },
+                        showSearchBox: true,
+                        searchFieldProps: TextFieldProps(
+                          controller: colorController,
+                          decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                              icon: const Icon(
+                                Icons.clear,
+                                color: Config.customGrey,
+                              ),
+                              onPressed: () {
+                                colorController.clear();
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedColor = value!.hex!;
+                        });
+                      },
+                      itemAsString: (item) => item.name!,
+                      dropdownDecoratorProps: DropDownDecoratorProps(
+                        dropdownSearchDecoration: InputDecoration(
+                          labelText: 'Color (Optional)',
+                          filled: true,
+                          fillColor: Theme.of(context)
+                              .inputDecorationTheme
+                              .fillColor, //gsutil cors set cors.json gs://kindahclothing
+                        ),
+                      ),
+                    ),
                   ),
                   Column(
                     mainAxisSize: MainAxisSize.min,

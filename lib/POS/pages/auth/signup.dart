@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kindah/POS/models/pos_user.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:uuid/uuid.dart';
+import '../../../dialog/error_dialog.dart';
 import '../../../widgets/progress_widget.dart';
 
 import '../../responsive.dart';
@@ -76,6 +77,9 @@ class _SignupState extends State<Signup> {
       return userID;
     } catch (e) {
       print(e.toString());
+
+      showErrorDialog(context, e.toString());
+
       return "";
     }
   }

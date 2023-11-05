@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/uploader.dart';
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_textfield.dart';
 import '../../widgets/ecomm_appbar.dart';
@@ -125,6 +126,8 @@ class _POSUploadPageState extends State<POSUploadPage> {
       });
     } catch (e) {
       print(e.toString());
+
+      showErrorDialog(context, e.toString());
 
       Fluttertoast.showToast(msg: "Error uploading product :(");
 

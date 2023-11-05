@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/models/order.dart' as template;
 import 'package:provider/provider.dart';
 
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../models/school.dart';
 import '../../models/uniform.dart';
 import '../../providers/uniform_provider.dart';
@@ -129,7 +130,7 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
           .doc(order.id)
           .update(order.toMap());
 
-      Fluttertoast.showToast(msg: "Template Updated Successfully!");
+      showCustomToast("Template Updated Successfully!");
 
       Provider.of<UniformProvider>(context, listen: false).clearChosenList();
 
@@ -139,7 +140,9 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "An ERROR Occured :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occured :(");
     }
   }
 
@@ -223,7 +226,7 @@ class _EditOrderDesignState extends State<EditOrderDesign> {
         }
       });
 
-      Fluttertoast.showToast(msg: "Template Uploaded Successfully!");
+      showCustomToast("Template Uploaded Successfully!");
     }
   }
 

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/models/user_request.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +45,7 @@ class _UserSettingsState extends State<UserSettings> {
             if (requestController.text.isNotEmpty) {
               Navigator.pop(context, "proceed");
             } else {
-              Fluttertoast.showToast(msg: "Input Empty");
+              showCustomToast("Input Empty");
             }
           },
           acceptTitle: "Proceed",
@@ -86,13 +86,13 @@ class _UserSettingsState extends State<UserSettings> {
           .doc(request.id)
           .set(request.toMap());
 
-      Fluttertoast.showToast(msg: "Request Sent Successfully!");
+      showCustomToast("Request Sent Successfully!");
 
       setState(() {
         loading = false;
       });
     } else {
-      Fluttertoast.showToast(msg: "Cancelled!");
+      showCustomToast("Cancelled!");
     }
   }
 

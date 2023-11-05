@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/models/account.dart';
 import 'package:kindah/widgets/custom_button.dart';
@@ -11,6 +11,7 @@ import 'package:kindah/widgets/progress_widget.dart';
 
 import '../common_functions/phone_validator.dart';
 import '../common_functions/user_role_solver.dart';
+import '../dialog/error_dialog.dart';
 import '../widgets/custom_popup.dart';
 
 class AuthPage extends StatefulWidget {
@@ -101,9 +102,9 @@ class _AuthPageState extends State<AuthPage> {
         } else {
           // Bypass user phone verification
 
-          await documentSnapshot.reference.update({
-            "verified": true,
-          });
+          // await documentSnapshot.reference.update({
+          //   "verified": true,
+          // });
 
           String preferedRole = await setUserRole(account);
 
@@ -196,7 +197,7 @@ class _AuthPageState extends State<AuthPage> {
           // );
         }
       } else {
-        Fluttertoast.showToast(msg: "User does NOT Exist :(");
+        showCustomToast("User does NOT Exist :(");
 
         setState(() {
           loading = false;
@@ -205,7 +206,9 @@ class _AuthPageState extends State<AuthPage> {
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "An ERROR occured :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR occured :(");
 
       setState(() {
         loading = false;
@@ -313,7 +316,7 @@ class _AuthPageState extends State<AuthPage> {
                                     });
                               }
                             } else {
-                              Fluttertoast.showToast(msg: "Fill in the form");
+                              showCustomToast("Fill in the form");
                             }
                           },
                         ),

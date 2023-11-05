@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/models/product.dart';
 import 'package:kindah/models/product_order.dart';
@@ -44,7 +44,7 @@ class _ProductOrderDesignState extends State<ProductOrderDesign> {
         "shipping": shipping + 1,
       });
 
-      Fluttertoast.showToast(msg: "Approved Successfully!");
+      showCustomToast("Approved Successfully!");
     } else {
       await FirebaseFirestore.instance
           .collection("order_count")
@@ -54,7 +54,7 @@ class _ProductOrderDesignState extends State<ProductOrderDesign> {
         "shipping": shipping - 1,
       });
 
-      Fluttertoast.showToast(msg: "Updated Successfully!");
+      showCustomToast("Updated Successfully!");
     }
   }
 

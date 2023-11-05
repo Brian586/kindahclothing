@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import 'package:kindah/widgets/custom_button.dart';
@@ -91,7 +91,7 @@ class _ProductCategoriesState extends State<ProductCategories> {
 
                   addCategory(categories);
                 } else {
-                  Fluttertoast.showToast(msg: "Please fill the form");
+                  showCustomToast("Please fill the form");
                 }
               },
               title: "SAVE",

@@ -95,7 +95,7 @@ List<DrawerItem> drawerItems = [
   ),
   DrawerItem(
     //14 ==
-    name: "All Payments",
+    name: "Make Payments",
     iconData: Icons.payments_outlined,
     urlID: "payments",
   ),

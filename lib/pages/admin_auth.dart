@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 
 import '../config.dart';
 import '../models/admin.dart';
@@ -40,7 +40,7 @@ class _AdminAuthState extends State<AdminAuth> {
 
       //context.read<AdminProvider>().changeAdmin(admin);
 
-      Fluttertoast.showToast(msg: "Welcome ${adminUsernameController.text}");
+      showCustomToast("Welcome ${adminUsernameController.text}");
 
       // setState(() {
       //   loading = false;
@@ -50,7 +50,7 @@ class _AdminAuthState extends State<AdminAuth> {
     } else {
       // Cancel authentication
 
-      Fluttertoast.showToast(msg: "Admin does NOT EXIST");
+      showCustomToast("Admin does NOT EXIST");
 
       setState(() {
         loading = false;
@@ -131,7 +131,7 @@ class _AdminAuthState extends State<AdminAuth> {
                                 adminUsernameController.text.isNotEmpty) {
                               adminSignIn(context);
                             } else {
-                              Fluttertoast.showToast(msg: "Fill in the form");
+                              showCustomToast("Fill in the form");
                             }
                           },
                         ),

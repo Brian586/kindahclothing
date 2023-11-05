@@ -127,9 +127,12 @@ class _OrderDesignState extends State<OrderDesign> {
                     color: Config.customGrey, fontWeight: FontWeight.w400),
               ),
             ),
-            Text(
-              widget.order.id!,
-              style: const TextStyle(color: Config.customBlue),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Text(
+                widget.order.id!,
+                style: const TextStyle(color: Config.customBlue),
+              ),
             ),
           ],
         ),

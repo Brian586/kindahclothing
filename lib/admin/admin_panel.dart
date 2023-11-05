@@ -149,6 +149,8 @@ class _AdminPanelState extends State<AdminPanel> {
       case "add_order":
         return const AddOrder(
           isAdmin: true,
+          userID: "",
+          userMap: {},
         );
       case "edit_orders":
         return const EditOrder(

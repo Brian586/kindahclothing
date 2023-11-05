@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/models/uniform.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
@@ -12,6 +12,7 @@ import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/update_admin_info.dart';
 import '../../common_functions/uploader.dart';
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_popup.dart';
 import '../../widgets/custom_textfield.dart';
 
@@ -91,11 +92,13 @@ class _UniformListItemState extends State<UniformListItem> {
               .doc(widget.uniform.id)
               .update({"imageUrl": downloadUrl});
 
-          Fluttertoast.showToast(msg: "Photo Uploaded");
+          showCustomToast("Photo Uploaded");
         } catch (e) {
           print(e.toString());
 
-          Fluttertoast.showToast(msg: "An Error Occurred");
+          showErrorDialog(context, e.toString());
+
+          showCustomToast("An Error Occurred");
         }
       } else {
         setState(() {
@@ -148,7 +151,7 @@ class _UniformListItemState extends State<UniformListItem> {
         "measurements": measurements.map((msmt) => msmt.toMap()).toList(),
       });
 
-      Fluttertoast.showToast(msg: "Updated Successfully!");
+      showCustomToast("Updated Successfully!");
 
       setState(() {
         loading = false;
@@ -156,11 +159,13 @@ class _UniformListItemState extends State<UniformListItem> {
     } catch (e) {
       print(e.toString());
 
+      showErrorDialog(context, e.toString());
+
       setState(() {
         loading = false;
       });
 
-      Fluttertoast.showToast(msg: "An Error Occurred");
+      showCustomToast("An Error Occurred");
     }
   }
 
@@ -191,7 +196,7 @@ class _UniformListItemState extends State<UniformListItem> {
 
       await UpdateAdminInfo().updateUniformsCount(widget.uniform, false);
 
-      Fluttertoast.showToast(msg: "Uniform Deleted Successfully");
+      showCustomToast("Uniform Deleted Successfully");
     }
   }
 
@@ -418,7 +423,7 @@ class _UniformListItemState extends State<UniformListItem> {
                         nameMeasureController.clear();
                       });
                     } else {
-                      Fluttertoast.showToast(msg: "Fill Measurement Form");
+                      showCustomToast("Fill Measurement Form");
                     }
                   },
                 ),

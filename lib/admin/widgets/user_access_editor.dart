@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
@@ -67,7 +67,7 @@ class _UserAccessEditorState extends State<UserAccessEditor> {
 
         await doc.reference.update({"items": selectedDrawerItems});
 
-        Fluttertoast.showToast(msg: "Updated Successfully!");
+        showCustomToast("Updated Successfully!");
 
         setState(() {
           loading = false;
@@ -82,7 +82,7 @@ class _UserAccessEditorState extends State<UserAccessEditor> {
             .doc("access_rights")
             .set({"items": selectedDrawerItems});
 
-        Fluttertoast.showToast(msg: "Updated Successfully!");
+        showCustomToast("Updated Successfully!");
 
         setState(() {
           loading = false;

@@ -20,6 +20,7 @@ class RequestAssistant {
       }
     } catch (exp) {
       print(exp.toString());
+
       return "Failed";
     }
   }

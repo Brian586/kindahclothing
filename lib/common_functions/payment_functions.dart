@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 
 import '../models/advance_payment.dart';
 import '../widgets/custom_popup.dart';
@@ -48,11 +48,11 @@ Future<String> promptClearAdvancePayments(
     // User has paid last installment so advance has been cleared
     await clearAdvancePayment(isPartial, installmentAmount, user["id"]);
 
-    await Fluttertoast.showToast(msg: "Advance Installment paid successfully!");
+    showCustomToast("Advance Installment paid successfully!");
 
     return "success";
   } else {
-    Fluttertoast.showToast(msg: "Cancelled");
+    showCustomToast("Cancelled");
 
     return "cancelled";
   }

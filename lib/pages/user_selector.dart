@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../config.dart';
@@ -67,6 +68,13 @@ class _UserSelectorState extends State<UserSelector> {
                     const SizedBox(
                       height: 20.0,
                     ),
+                    Text(
+                      "18:20 pm, 05 NOV 2023 Version",
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(
+                      height: 20.0,
+                    ),
                     const Text(
                       "Continue As...",
                       style: TextStyle(
@@ -75,70 +83,61 @@ class _UserSelectorState extends State<UserSelector> {
                           fontWeight: FontWeight.w700),
                     ),
                     // ========== CHOICES ========== //
-                    choiceDesign(size, userChoices[0]),
-                    ExpansionTile(
-                      onExpansionChanged: (value) {
-                        setState(() {
-                          isExpanded = value;
-                        });
-                      },
-                      collapsedShape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0)),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0)),
-                      collapsedIconColor: Colors.white,
-                      leading: Icon(
-                        Icons.badge_outlined,
-                        color: isExpanded ? Config.customBlue : Colors.white,
-                      ),
-                      childrenPadding: const EdgeInsets.only(left: 10.0),
-                      collapsedBackgroundColor: Config.customBlue,
-                      backgroundColor: Config.customBlue.withOpacity(0.1),
-                      title: Text(
-                        userChoices[1].title!,
-                        style: TextStyle(
-                            // fontWeight: FontWeight.normal,
-                            color: isExpanded
-                                ? Config.customBlue
-                                : Colors.white70),
-                      ),
-                      subtitle: Text(
-                        userChoices[1].description!,
-                        style: TextStyle(
-                            color: isExpanded
-                                ? Config.customBlue
-                                : Colors.white70),
-                      ),
-                      children: [
-                        choiceDesign(size, userChoices[1]),
-                        choiceDesign(size, userChoices[2])
-                      ],
-                    )
+                    // choiceDesign(size, userChoices[0]),
+                    choiceDesign(size, userChoices[1]),
+                    choiceDesign(size, userChoices[2]),
+                    // ExpansionTile(
+                    //   onExpansionChanged: (value) {
+                    //     setState(() {
+                    //       isExpanded = value;
+                    //     });
+                    //   },
+                    //   collapsedShape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(10.0)),
+                    //   shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(10.0)),
+                    //   collapsedIconColor: Colors.white,
+                    //   leading: Icon(
+                    //     Icons.badge_outlined,
+                    //     color: isExpanded ? Config.customBlue : Colors.white,
+                    //   ),
+                    //   childrenPadding: const EdgeInsets.only(left: 10.0),
+                    //   collapsedBackgroundColor: Config.customBlue,
+                    //   backgroundColor: Config.customBlue.withOpacity(0.1),
+                    //   title: Text(
+                    //     userChoices[1].title!,
+                    //     style: TextStyle(
+                    //         // fontWeight: FontWeight.normal,
+                    //         color: isExpanded
+                    //             ? Config.customBlue
+                    //             : Colors.white70),
+                    //   ),
+                    //   subtitle: Text(
+                    //     userChoices[1].description!,
+                    //     style: TextStyle(
+                    //         color: isExpanded
+                    //             ? Config.customBlue
+                    //             : Colors.white70),
+                    //   ),
+                    //   children: [
+                    //     choiceDesign(size, userChoices[1]),
+                    //     choiceDesign(size, userChoices[2])
+                    //   ],
+                    // )
                     // TextButton(
                     //     onPressed: () async {
                     //       // FIRST Add verified to the documents in db
-                    //       // QuerySnapshot querySnapshot = await FirebaseFirestore
-                    //       //     .instance
-                    //       //     .collection("users")
-                    //       //     .get();
+                    //       QuerySnapshot querySnapshot = await FirebaseFirestore
+                    //           .instance
+                    //           .collection("uniforms")
+                    //           .get();
 
-                    //       // querySnapshot.docs.forEach((element) async {
-                    //       //   await element.reference.set(
-                    //       //       {"verified": false, "devices": []},
-                    //       //       SetOptions(merge: true));
-                    //       // });
-
-                    //       // print("FINISHED 1st Step");
-
-                    //       // SECOND: Go to Account Model and change String to List
-
-                    //       // THIRD: Go to Add users and make the userrole multiselection
-
-                    //       // FORTH: Check for any userRole queries in the system
-
-                    //       // Also check EDIT USERS section for the user Roles
+                    //       querySnapshot.docs.forEach((element) async {
+                    //         await element.reference
+                    //             .set({"color": ""}, SetOptions(merge: true));
+                    //       });
                     //     },
-                    //     child: Text("Update Users"))
+                    //     child: Text("Update Uniforms"))
                   ],
                 ),
               ),

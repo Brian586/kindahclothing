@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/APIs/m_pesa.dart';
 import 'package:kindah/APIs/paypal.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/widgets/count_down_timer.dart';
 import 'package:kindah/widgets/custom_button.dart';
@@ -59,7 +59,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
               proceedBackToTemplate(map);
             } else {
-              Fluttertoast.showToast(msg: "Please fill the form");
+              showCustomToast("Please fill the form");
             }
           },
           acceptTitle: "PROCEED",
@@ -117,12 +117,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
           paymentProcessing = false;
         });
 
-        Fluttertoast.showToast(msg: "An ERROR Occured");
+        showCustomToast("An ERROR Occured");
 
         Navigator.pop(context, "cancelled");
       }
     } else {
-      Fluttertoast.showToast(msg: "Phone Number needed");
+      showCustomToast("Phone Number needed");
     }
   }
 
@@ -202,12 +202,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
           paymentProcessing = false;
         });
 
-        Fluttertoast.showToast(msg: "An ERROR Occured");
+        showCustomToast("An ERROR Occured");
 
         Navigator.pop(context, "cancelled");
       }
     } else {
-      Fluttertoast.showToast(msg: "Phone Number needed");
+      showCustomToast("Phone Number needed");
     }
   }
 
@@ -284,7 +284,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     if (result != "failed") {
       Navigator.pop(context, result);
     } else {
-      Fluttertoast.showToast(msg: "An ERROR Occurred :(");
+      showCustomToast("An ERROR Occurred :(");
     }
   }
 

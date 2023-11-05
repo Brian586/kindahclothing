@@ -10,6 +10,7 @@ import '../providers/account_provider.dart';
 import '../user_panel/widgets/user_custom_header.dart';
 import '../widgets/custom_scrollbar.dart';
 import '../widgets/custom_wrapper.dart';
+import '../widgets/done_order_data_source.dart';
 
 class SpecialMachineHandler extends StatefulWidget {
   const SpecialMachineHandler({super.key});
@@ -63,6 +64,9 @@ class _SpecialMachineHandlerState extends State<SpecialMachineHandler> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      UserDataGrid(
+                          account: account,
+                          preferedRole: "special_machine_handler"),
                       NoData(
                         title: "Welcome, ${account.username!}",
                       )

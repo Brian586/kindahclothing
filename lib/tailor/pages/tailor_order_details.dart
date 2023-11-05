@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:provider/provider.dart';
 import 'package:kindah/models/order.dart' as template;
@@ -25,6 +25,7 @@ class TailorOrderDetails extends StatefulWidget {
 
 class _TailorOrderDetailsState extends State<TailorOrderDetails> {
   bool loading = false;
+  List<Uniform> chosenUniforms = [];
 
   void completeOrder(template.Order order, Account account) async {
     setState(() {
@@ -58,9 +59,16 @@ class _TailorOrderDetailsState extends State<TailorOrderDetails> {
     });
 
     // UPDATE DONE ORDER=========================================
-    await UpdateDoneOrders.updatePendingOrders(account, order.id!);
+    // await UpdateDoneOrders.updatePendingOrders(account, order.id!);
+    await UpdateDoneOrders.updateDoneOrders(
+        chosenUniforms: chosenUniforms,
+        orderId: order.id!,
+        userRole: "tailor",
+        isAdmin: false,
+        userMap: account.toMap(),
+        userID: account.id);
 
-    Fluttertoast.showToast(msg: "Updated Successfully!");
+    showCustomToast("Updated Successfully!");
 
     setState(() {
       loading = false;
@@ -188,11 +196,13 @@ class _TailorOrderDetailsState extends State<TailorOrderDetails> {
                       return circularProgress();
                     } else {
                       List<Uniform> uniforms = [];
+                      chosenUniforms = [];
 
                       snapshot.data!.docs.forEach((element) {
                         Uniform uniform = Uniform.fromDocument(element);
 
                         uniforms.add(uniform);
+                        chosenUniforms.add(uniform);
                       });
 
                       return Column(

@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/admin/widgets/custom_header.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/common_functions/uploader.dart';
 import 'package:kindah/models/product.dart';
@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../common_functions/custom_file_picker.dart';
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_textfield.dart';
@@ -103,7 +104,7 @@ class _AddProductsState extends State<AddProducts> {
 
       await UpdateAdminInfo().updateProductsCount(product, true);
 
-      Fluttertoast.showToast(msg: "Product Uploaded Successfully!");
+      showCustomToast("Product Uploaded Successfully!");
 
       setState(() {
         titleController.clear();
@@ -116,7 +117,9 @@ class _AddProductsState extends State<AddProducts> {
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "Error uploading product :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("Error uploading product :(");
 
       setState(() {
         loading = false;
@@ -280,8 +283,8 @@ class _AddProductsState extends State<AddProducts> {
                                     descriptionController.text.isNotEmpty) {
                                   saveProductToFirestore();
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Fill in the required fields");
+                                  showCustomToast(
+                                      "Fill in the required fields");
                                 }
                               },
                             ),

@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/update_done_orders.dart';
+import 'package:kindah/dialog/error_dialog.dart';
 import 'package:kindah/models/order.dart' as template;
 import 'package:kindah/config.dart';
 import 'package:kindah/user_panel/widgets/user_custom_header.dart';
@@ -11,10 +10,9 @@ import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../../common_functions/custom_toast.dart';
 import '../../models/school.dart';
 import '../../models/uniform.dart';
-import '../../pages/payment_screen.dart';
-import '../../pages/payment_successful.dart';
 import '../../providers/uniform_provider.dart';
 import '../../shop_attendant/widgets/uniform_design.dart';
 import '../../widgets/custom_button.dart';
@@ -24,7 +22,13 @@ import '../widgets/custom_header.dart';
 
 class AddOrder extends StatefulWidget {
   final bool isAdmin;
-  const AddOrder({super.key, required this.isAdmin});
+  final String userID;
+  final Map<String, dynamic> userMap;
+  const AddOrder(
+      {super.key,
+      required this.isAdmin,
+      required this.userID,
+      required this.userMap});
 
   @override
   State<AddOrder> createState() => _AddOrderState();
@@ -70,27 +74,35 @@ class _AddOrderState extends State<AddOrder> {
     return schools;
   }
 
-  void authorizePayment(BuildContext context, List<Uniform> chosenUniforms,
+  void uploadTemplate(BuildContext context, List<Uniform> chosenUniforms,
       double totalAmount) async {
     try {
-      String data = Uniform.encode(chosenUniforms);
+      // String data = Uniform.encode(chosenUniforms);
       // Display payment screen
 
-      String result = await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentScreen(
-                    totalAmount: totalAmount,
-                    data: data,
-                    page: "uniform",
-                  )));
+      String result = "proceed";
+
+      // String result = await Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => PaymentScreen(
+      //               totalAmount: totalAmount,
+      //               data: data,
+      //               page: "uniform",
+      //             )));
 
       if (result != "cancelled") {
         setState(() {
           loading = true;
         });
 
-        Map<String, dynamic> paymentInfo = json.decode(result);
+        // Map<String, dynamic> paymentInfo = json.decode(result);
+        // Bypass Payment method: assume payment by cash
+        Map<String, dynamic> paymentInfo = {
+          "payment_method": "Cash",
+          "status": "paid",
+          "contact": "254700000000"
+        };
 
         DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
             .collection("order_count")
@@ -111,10 +123,10 @@ class _AddOrderState extends State<AddOrder> {
             status: "paid",
             paymentInfo: paymentInfo,
             totalAmount: totalAmount,
-            publisher: "0001",
+            publisher: widget.isAdmin ? "0001" : widget.userID,
             processedStatus: "not processed",
             assignedStatus: "not assigned",
-            shopAttendant: {},
+            shopAttendant: widget.isAdmin ? {} : widget.userMap,
             fabricCutter: {},
             tailor: {},
             finisher: {});
@@ -140,14 +152,15 @@ class _AddOrderState extends State<AddOrder> {
           "count": count + 1,
         });
 
-        Fluttertoast.showToast(msg: "Template Uploaded Successfully!");
+        showCustomToast("Template Uploaded Successfully!");
 
-        await Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const PaymentSuccessful(
-                      text: "Payment Successful!",
-                    )));
+        await UpdateDoneOrders.updateDoneOrders(
+            chosenUniforms: chosenUniforms,
+            orderId: order.id!,
+            userRole: widget.isAdmin ? "Admin" : "shop_attendant",
+            isAdmin: widget.isAdmin,
+            userMap: widget.isAdmin ? {} : widget.userMap,
+            userID: widget.isAdmin ? "" : widget.userID);
 
         Provider.of<UniformProvider>(context, listen: false).clearChosenList();
 
@@ -162,12 +175,22 @@ class _AddOrderState extends State<AddOrder> {
           selectedSchool = null;
         });
       } else {
-        Fluttertoast.showToast(msg: "Payment has been cancelled :(");
+        showCustomToast("Payment has been cancelled :(");
+
+        setState(() {
+          loading = false;
+        });
       }
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "An ERROR Occured :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occured :(");
+
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -391,11 +414,10 @@ class _AddOrderState extends State<AddOrder> {
                                     classController.text.isNotEmpty &&
                                     selectedSchool != null) {
                                   // Proceed to pay
-                                  authorizePayment(
+                                  uploadTemplate(
                                       context, chosenUniforms, totalAmount);
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Fill the required fields");
+                                  showCustomToast("Fill the required fields");
                                 }
                               },
                               title: "Upload Template",

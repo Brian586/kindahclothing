@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/models/school.dart';
 import 'package:kindah/widgets/progress_widget.dart';
@@ -11,6 +11,7 @@ import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/load_json.dart';
 import '../../common_functions/uploader.dart';
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../models/custom_location.dart';
 import '../../widgets/custom_popup.dart';
 import '../../widgets/custom_textfield.dart';
@@ -89,13 +90,15 @@ class _SchoolListItemState extends State<SchoolListItem> {
               "imageUrl": uniformUrl,
             });
 
-            Fluttertoast.showToast(msg: "Photo Updated");
+            showCustomToast("Photo Updated");
 
             setState(() {});
           } catch (e) {
             print(e.toString());
 
-            Fluttertoast.showToast(msg: "An Error Occurred!");
+            showErrorDialog(context, e.toString());
+
+            showCustomToast("An Error Occurred!");
           }
         } else {
           setState(() {
@@ -135,13 +138,15 @@ class _SchoolListItemState extends State<SchoolListItem> {
               "logo": logoUrl,
             });
 
-            Fluttertoast.showToast(msg: "Logo Updated");
+            showCustomToast("Logo Updated");
 
             setState(() {});
           } catch (e) {
             print(e.toString());
 
-            Fluttertoast.showToast(msg: "An Error Occurred!");
+            showErrorDialog(context, e.toString());
+
+            showCustomToast("An Error Occurred!");
           }
         } else {
           setState(() {
@@ -179,7 +184,7 @@ class _SchoolListItemState extends State<SchoolListItem> {
 
       await UpdateAdminInfo().updateSchoolCount(school, false);
 
-      Fluttertoast.showToast(msg: "Deleted Successfully!");
+      showCustomToast("Deleted Successfully!");
     } else {
       // Do Nothing...
     }
@@ -201,7 +206,7 @@ class _SchoolListItemState extends State<SchoolListItem> {
         "country": countryController.text.trim()
       });
 
-      Fluttertoast.showToast(msg: "Updated");
+      showCustomToast("Updated");
 
       setState(() {
         loading = false;
@@ -209,11 +214,13 @@ class _SchoolListItemState extends State<SchoolListItem> {
     } catch (e) {
       print(e.toString());
 
+      showErrorDialog(context, e.toString());
+
       setState(() {
         loading = false;
       });
 
-      Fluttertoast.showToast(msg: "An Error Occurred");
+      showCustomToast("An Error Occurred");
     }
   }
 

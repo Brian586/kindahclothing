@@ -7,6 +7,7 @@ import 'package:kindah/config.dart';
 import 'package:kindah/models/account.dart';
 import 'package:kindah/providers/account_provider.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
+import 'package:kindah/widgets/done_order_data_source.dart';
 import 'package:kindah/widgets/no_data.dart';
 import 'package:kindah/widgets/order_design.dart';
 import 'package:provider/provider.dart';
@@ -65,6 +66,7 @@ class _ShopAttendantState extends State<ShopAttendant> {
             const UserCustomHeader(
               action: [],
             ),
+            UserDataGrid(account: account, preferedRole: preferedRole),
             Align(
               alignment: Alignment.topLeft,
               child: CustomWrapper(
@@ -134,14 +136,13 @@ class _ShopAttendantState extends State<ShopAttendant> {
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
+                          children: [
                             Text(
-                              "Recent Templates",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Config.customGrey),
+                              "Recently Created Templates",
+                              maxLines: 2,
+                              style: Theme.of(context).textTheme.titleLarge,
                             ),
-                            SizedBox()
+                            const SizedBox()
                           ],
                         ),
                       ),
@@ -229,14 +230,15 @@ class _ShopAttendantState extends State<ShopAttendant> {
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
-                                      children: const [
+                                      children: [
                                         Text(
                                           "Orders Ready To Be Dispatched",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              color: Config.customGrey),
+                                          maxLines: 2,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge,
                                         ),
-                                        SizedBox()
+                                        const SizedBox()
                                       ],
                                     ),
                                   ),

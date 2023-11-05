@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/providers/uniform_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:kindah/models/order.dart' as template;
 
+import '../../dialog/error_dialog.dart';
 import '../../models/account.dart';
 import '../../models/school.dart';
 import '../../models/uniform.dart';
@@ -158,7 +159,7 @@ class _EditTemplateState extends State<EditTemplate> {
       //       .set(uniform.toMap());
       // }
 
-      Fluttertoast.showToast(msg: "Template Updated Successfully!");
+      showCustomToast("Template Updated Successfully!");
 
       Provider.of<UniformProvider>(context, listen: false).clearChosenList();
 
@@ -170,7 +171,12 @@ class _EditTemplateState extends State<EditTemplate> {
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "An ERROR Occured :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occured :(");
+      setState(() {
+        loading = false;
+      });
     }
   }
 
@@ -391,7 +397,7 @@ class _EditTemplateState extends State<EditTemplate> {
                     updateOrderInfo(
                         context, chosenUniforms, totalAmount, account);
                   } else {
-                    Fluttertoast.showToast(msg: "Fill the required fields");
+                    showCustomToast("Fill the required fields");
                   }
                 },
                 title: "Update Template",

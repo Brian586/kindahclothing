@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:kindah/common_functions/custom_file_picker.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/common_functions/phone_validator.dart';
 import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/common_functions/uploader.dart';
@@ -17,6 +17,7 @@ import 'package:kindah/widgets/custom_textfield.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_scrollbar.dart';
 import '../widgets/custom_header.dart';
 
@@ -89,9 +90,8 @@ class _AddUsersState extends State<AddUsers> {
 
       await UpdateAdminInfo().updateUserCount(account, true);
 
-      Fluttertoast.showToast(
-          msg:
-              "${nameController.text.trim()} added to the database successfully!");
+      showCustomToast(
+          "${nameController.text.trim()} added to the database successfully!");
 
       setState(() {
         file = null;
@@ -106,7 +106,9 @@ class _AddUsersState extends State<AddUsers> {
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "Error saving data :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("Error saving data :(");
 
       setState(() {
         loading = false;
@@ -290,8 +292,8 @@ class _AddUsersState extends State<AddUsers> {
                                         });
                                   }
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Fill in the required fields");
+                                  showCustomToast(
+                                      "Fill in the required fields");
                                 }
                               },
                             ),

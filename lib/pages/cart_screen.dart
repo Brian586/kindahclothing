@@ -1,22 +1,20 @@
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/widgets/adaptive_ui.dart';
 import 'package:kindah/widgets/custom_button.dart';
 import 'package:provider/provider.dart';
 
 import '../Ads/ad_state.dart';
+import '../dialog/error_dialog.dart';
 import '../models/product.dart';
 import '../models/product_order.dart';
 import '../providers/product_provider.dart';
 import '../widgets/product_card.dart';
 import '../widgets/progress_widget.dart';
-import 'payment_screen.dart';
 import 'payment_successful.dart';
 
 class CartScreen extends StatefulWidget {
@@ -51,24 +49,32 @@ class _CartScreenState extends State<CartScreen> {
 
   void proceedToCheckout(double totalAmount, List<Product> products) async {
     try {
-      String data = Product.encode(products);
+      // String data = Product.encode(products);
       // Display payment screen
 
-      String result = await Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentScreen(
-                    totalAmount: totalAmount,
-                    data: data,
-                    page: 'ecommerce',
-                  )));
+      String result = "proceed";
+
+      // String result = await Navigator.push(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => PaymentScreen(
+      //               totalAmount: totalAmount,
+      //               data: data,
+      //               page: 'ecommerce',
+      //             )));
 
       if (result != "cancelled") {
         setState(() {
           loading = true;
         });
 
-        Map<String, dynamic> paymentInfo = json.decode(result);
+        // Map<String, dynamic> paymentInfo = json.decode(result);
+        // Bypass Payment method: assume payment by cash
+        Map<String, dynamic> paymentInfo = {
+          "payment_method": "Cash",
+          "status": "paid",
+          "contact": "254700000000"
+        };
 
         DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
             .collection("order_count")
@@ -102,7 +108,7 @@ class _CartScreenState extends State<CartScreen> {
             .doc("product_order_count")
             .update({"count": count + 1, "pending": pending + 1});
 
-        Fluttertoast.showToast(msg: "Order Placed Successfully!");
+        showCustomToast("Order Placed Successfully!");
 
         await Navigator.push(
             context,
@@ -122,7 +128,14 @@ class _CartScreenState extends State<CartScreen> {
       }
     } catch (e) {
       print(e.toString());
-      Fluttertoast.showToast(msg: "An ERROR Occurred :(");
+
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occurred :(");
+
+      setState(() {
+        loading = false;
+      });
     }
   }
 

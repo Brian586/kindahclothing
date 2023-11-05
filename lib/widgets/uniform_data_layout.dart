@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kindah/models/uniform.dart';
 
+import '../common_functions/color_functions.dart';
 import '../config.dart';
 
 class UniformDataLayout extends StatelessWidget {
@@ -40,12 +41,46 @@ class UniformDataLayout extends StatelessWidget {
                 ],
               ),
             ),
+            RichText(
+              textAlign: TextAlign.start,
+              text: TextSpan(
+                children: <TextSpan>[
+                  const TextSpan(
+                      text: 'Size: ',
+                      style: TextStyle(color: Config.customGrey)),
+                  TextSpan(
+                      text: sizeMatcher(uniform!.size!),
+                      style: const TextStyle(
+                          color: Config.customGrey,
+                          fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('Color: ',
+                    style: TextStyle(color: Config.customGrey)),
+                Container(
+                  height: 20.0,
+                  width: 20.0,
+                  color: hexToColor(uniform!.color!),
+                ),
+                const SizedBox(width: 10.0),
+                Text(
+                  findColorName(uniform!.color!),
+                  overflow: TextOverflow.ellipsis,
+                )
+              ],
+            ),
             const SizedBox(
               height: 5.0,
             ),
             Image.network(
               uniform!.imageUrl!,
-              width: 200.0,
+              height: 300.0,
+              width: size.width,
               fit: BoxFit.contain,
             ),
             const SizedBox(

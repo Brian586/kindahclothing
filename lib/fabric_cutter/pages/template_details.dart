@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/fabric_cutter/pages/choose_tailor.dart';
 import 'package:kindah/models/uniform.dart';
@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:kindah/models/order.dart' as template;
 
 import '../../common_functions/update_done_orders.dart';
+import '../../dialog/error_dialog.dart';
 import '../../models/account.dart';
 import '../../providers/account_provider.dart';
 
@@ -26,8 +27,9 @@ class TemplateDetails extends StatefulWidget {
 
 class _TemplateDetailsState extends State<TemplateDetails> {
   bool isProcessing = false;
+  List<Uniform> chosenUniforms = [];
 
-  void selectForProcessing(Account account) async {
+  void selectForProcessing(Account account, template.Order order) async {
     setState(() {
       isProcessing = true;
     });
@@ -56,7 +58,15 @@ class _TemplateDetailsState extends State<TemplateDetails> {
       });
 
       // UPDATE DONE ORDER=========================================
-      await UpdateDoneOrders.updatePendingOrders(account, widget.templateID!);
+      // await UpdateDoneOrders.updatePendingOrders(account, widget.templateID!);
+
+      await UpdateDoneOrders.updateDoneOrders(
+          chosenUniforms: chosenUniforms,
+          orderId: order.id!,
+          userRole: "fabric_cutter",
+          isAdmin: false,
+          userMap: account.toMap(),
+          userID: account.id);
 
       setState(() {
         isProcessing = false;
@@ -64,7 +74,9 @@ class _TemplateDetailsState extends State<TemplateDetails> {
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "An ERROR Occured :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occured :(");
 
       setState(() {
         isProcessing = false;
@@ -112,12 +124,14 @@ class _TemplateDetailsState extends State<TemplateDetails> {
           "assigned": assignedCount + 1,
         });
 
-        Fluttertoast.showToast(msg: "Assigned Successfully!");
+        showCustomToast("Assigned Successfully!");
       }
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "An ERROR Occured :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occured :(");
     }
   }
 
@@ -125,7 +139,7 @@ class _TemplateDetailsState extends State<TemplateDetails> {
     switch (order.processedStatus) {
       case "not processed":
         return CustomButton(
-          onPressed: () => selectForProcessing(account),
+          onPressed: () => selectForProcessing(account, order),
           title: "Process this order",
           iconData: Icons.cut_rounded,
         );
@@ -139,7 +153,7 @@ class _TemplateDetailsState extends State<TemplateDetails> {
         return Container();
       default:
         return CustomButton(
-          onPressed: () => selectForProcessing(account),
+          onPressed: () => selectForProcessing(account, order),
           title: "Process this order",
           iconData: Icons.cut_rounded,
         );
@@ -267,11 +281,13 @@ class _TemplateDetailsState extends State<TemplateDetails> {
                       return circularProgress();
                     } else {
                       List<Uniform> uniforms = [];
+                      chosenUniforms = [];
 
                       snapshot.data!.docs.forEach((element) {
                         Uniform uniform = Uniform.fromDocument(element);
 
                         uniforms.add(uniform);
+                        chosenUniforms.add(uniform);
                       });
 
                       return Column(

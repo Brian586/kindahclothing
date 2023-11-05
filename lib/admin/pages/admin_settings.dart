@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../models/admin.dart';
 import '../../providers/admin_provider.dart';
 import '../../widgets/custom_button.dart';
@@ -44,7 +45,7 @@ class _AdminSettingsState extends State<AdminSettings> {
         "email": emailController.text.trim()
       });
 
-      Fluttertoast.showToast(msg: "Updated Successfully!");
+      showCustomToast("Updated Successfully!");
 
       setState(() {
         loading = false;
@@ -52,11 +53,13 @@ class _AdminSettingsState extends State<AdminSettings> {
     } catch (e) {
       print(e.toString());
 
+      showErrorDialog(context, e.toString());
+
       setState(() {
         loading = false;
       });
 
-      Fluttertoast.showToast(msg: "An ERROR Occurred!");
+      showCustomToast("An ERROR Occurred!");
     }
   }
 
@@ -135,8 +138,7 @@ class _AdminSettingsState extends State<AdminSettings> {
                                     phoneNumber.isNotEmpty) {
                                   updateAdminInfo(admin);
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Fill in the required fields");
+                                  showCustomToast("Please fill all fields");
                                 }
                               },
                             ),

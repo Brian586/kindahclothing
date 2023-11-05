@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/common_functions/update_admin_info.dart';
 import 'package:kindah/models/uniform.dart';
 import 'package:kindah/user_panel/widgets/user_custom_header.dart';
@@ -12,6 +12,7 @@ import 'package:kindah/user_panel/widgets/user_custom_header.dart';
 import '../../common_functions/custom_file_picker.dart';
 import '../../common_functions/uploader.dart';
 import '../../config.dart';
+import '../../dialog/error_dialog.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_scrollbar.dart';
 import '../../widgets/custom_textfield.dart';
@@ -36,7 +37,7 @@ class _AddUniformsState extends State<AddUniforms> {
   TextEditingController symbolController = TextEditingController();
   List<UniformMeasurement> measurements = [];
   String selectedCategory = "";
-  String units = "mm";
+  String units = "inches";
   bool loading = false;
   PlatformFile? file;
 
@@ -73,6 +74,8 @@ class _AddUniformsState extends State<AddUniforms> {
         imageUrl: downloadUrl,
         quantity: 0,
         timestamp: timestamp,
+        size: "M",
+        color: "",
         measurements: measurements.map((msmt) => msmt.toMap()).toList(),
       );
 
@@ -83,9 +86,8 @@ class _AddUniformsState extends State<AddUniforms> {
 
       await UpdateAdminInfo().updateUniformsCount(uniform, true);
 
-      Fluttertoast.showToast(
-          msg:
-              "${nameController.text.trim()} added to the database successfully!");
+      showCustomToast(
+          "${nameController.text.trim()} added to the database successfully!");
 
       setState(() {
         file = null;
@@ -99,7 +101,9 @@ class _AddUniformsState extends State<AddUniforms> {
     } catch (e) {
       print(e.toString());
 
-      Fluttertoast.showToast(msg: "Error saving data :(");
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("Error saving data :(");
 
       setState(() {
         loading = false;
@@ -164,44 +168,59 @@ class _AddUniformsState extends State<AddUniforms> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Stack(
-                              children: [
-                                file == null
-                                    ? const Icon(
-                                        Icons.image_outlined,
-                                        color: Colors.black12,
-                                        size: 100.0,
-                                      )
-                                    : Image.memory(
-                                        file!.bytes!,
-                                        height: 200.0,
-                                        width: 200.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                Positioned(
-                                  bottom: 0.0,
-                                  right: 0.0,
-                                  child: Card(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20.0)),
-                                    child: CircleAvatar(
-                                      radius: 20.0,
-                                      backgroundColor: Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                      child: Center(
-                                        child: IconButton(
-                                          icon: const Icon(
-                                            Icons.add_a_photo_rounded,
-                                            color: Config.customGrey,
+                            Container(
+                              width: double.infinity,
+                              height: file == null ? null : 400.0,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  border: Border.all(
+                                    color: file == null
+                                        ? Config.customGrey
+                                        : Config.customBlue,
+                                    width: 1.0,
+                                    style: BorderStyle.solid,
+                                  )),
+                              child: Stack(
+                                children: [
+                                  file == null
+                                      ? const Center(
+                                          child: Icon(
+                                            Icons.image_outlined,
+                                            color: Colors.black12,
+                                            size: 100.0,
                                           ),
-                                          onPressed: () => pickPhoto(),
+                                        )
+                                      : Image.memory(
+                                          file!.bytes!,
+                                          height: 400.0,
+                                          width: size.width,
+                                          fit: BoxFit.contain,
+                                        ),
+                                  Positioned(
+                                    bottom: 0.0,
+                                    right: 0.0,
+                                    child: Card(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20.0)),
+                                      child: CircleAvatar(
+                                        radius: 20.0,
+                                        backgroundColor: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        child: Center(
+                                          child: IconButton(
+                                            icon: const Icon(
+                                              Icons.add_a_photo_rounded,
+                                              color: Config.customGrey,
+                                            ),
+                                            onPressed: () => pickPhoto(),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                )
-                              ],
+                                  )
+                                ],
+                              ),
                             ),
                             file != null
                                 ? TextButton.icon(
@@ -243,8 +262,7 @@ class _AddUniformsState extends State<AddUniforms> {
                                 clearButtonProps:
                                     const ClearButtonProps(isVisible: true),
                                 popupProps: PopupProps.menu(
-                                  disabledItemFn: (dynamic s) =>
-                                      s.startsWith('A'),
+                                  disabledItemFn: (dynamic cat) => cat == "All",
                                   itemBuilder: (context, category, isSelected) {
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(
@@ -294,7 +312,7 @@ class _AddUniformsState extends State<AddUniforms> {
                             CustomTextField(
                               controller: priceController,
                               hintText: "KSH 0.00",
-                              title: "Unit Price*",
+                              title: "Unit Price (KSH)*",
                               inputType: TextInputType.number,
                             ),
                             const Text(
@@ -305,96 +323,138 @@ class _AddUniformsState extends State<AddUniforms> {
                             ),
                             measurements.isEmpty
                                 ? Container()
-                                : Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: List.generate(measurements.length,
-                                        (index) {
-                                      return Card(
-                                        child: ListTile(
-                                          leading: Text(
-                                            measurements[index].symbol!,
-                                          ),
-                                          title:
-                                              Text(measurements[index].name!),
-                                          subtitle: Text(
-                                              "${measurements[index].measurement} ${measurements[index].units}"),
-                                          trailing: IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                measurements.remove(
-                                                    measurements[index]);
-                                              });
-                                            },
-                                            icon: const Icon(
-                                              Icons.clear,
+                                : Container(
+                                    width: size.width,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                        border: Border.all(
+                                          color: Config.customBlue,
+                                          width: 1.0,
+                                          style: BorderStyle.solid,
+                                        )),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: List.generate(
+                                          measurements.length, (index) {
+                                        return Card(
+                                          child: ListTile(
+                                            leading: Text(
+                                              measurements[index].symbol!,
+                                            ),
+                                            title:
+                                                Text(measurements[index].name!),
+                                            subtitle: Text(
+                                                "${measurements[index].measurement} ${measurements[index].units}"),
+                                            trailing: IconButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  measurements.remove(
+                                                      measurements[index]);
+                                                });
+                                              },
+                                              icon: const Icon(
+                                                Icons.clear,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      );
-                                    }),
+                                        );
+                                      }),
+                                    ),
                                   ),
                             const SizedBox(
                               height: 20.0,
                             ),
-                            CustomTextField(
-                              controller: symbolController,
-                              hintText: "Symbol",
-                              title:
-                                  "Measurement Symbol (As per image provided above)",
-                              inputType: TextInputType.name,
-                            ),
-                            CustomTextField(
-                              controller: nameMeasureController,
-                              hintText: "e.g Chest, Arm, Waist",
-                              title: "Measurement Name",
-                              inputType: TextInputType.name,
-                            ),
-                            DropdownSearch<String>(
-                              items: const ["mm", "cm", "m", "inch"],
-                              popupProps: const PopupProps.menu(),
-                              onChanged: (value) {
-                                setState(() {
-                                  units = value!;
-                                });
-                              },
-                              selectedItem: units,
-                            ),
-                            TextButton.icon(
-                              icon: const Icon(
-                                Icons.add,
-                                color: Config.customBlue,
-                              ),
-                              label: const Text(
-                                "Add Measurement",
-                                style: TextStyle(color: Config.customBlue),
-                              ),
-                              onPressed: () {
-                                if (symbolController.text.isNotEmpty &&
-                                    nameMeasureController.text.isNotEmpty) {
-                                  UniformMeasurement uniformMeasurement =
-                                      UniformMeasurement(
-                                    symbol: symbolController.text.trim(),
-                                    name: nameMeasureController.text.trim(),
-                                    measurement: 0.0,
-                                    units: units,
-                                  );
+                            Align(
+                              alignment: Alignment.topLeft,
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                    minWidth: 100.0, maxWidth: 300.0),
+                                child: Card(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        CustomTextField(
+                                          controller: symbolController,
+                                          hintText: "Symbol",
+                                          title:
+                                              "Measurement Symbol e.g A, B, C..",
+                                          inputType: TextInputType.name,
+                                        ),
+                                        CustomTextField(
+                                          controller: nameMeasureController,
+                                          hintText: "e.g Chest, Arm, Waist",
+                                          title: "Measurement Name",
+                                          inputType: TextInputType.name,
+                                        ),
+                                        DropdownSearch<String>(
+                                          items: const [
+                                            "mm",
+                                            "cm",
+                                            "m",
+                                            "inches"
+                                          ],
+                                          popupProps: const PopupProps.menu(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              units = value!;
+                                            });
+                                          },
+                                          selectedItem: units,
+                                        ),
+                                        TextButton.icon(
+                                          icon: const Icon(
+                                            Icons.add,
+                                            color: Config.customBlue,
+                                          ),
+                                          label: const Text(
+                                            "Add Measurement",
+                                            style: TextStyle(
+                                                color: Config.customBlue),
+                                          ),
+                                          onPressed: () {
+                                            if (symbolController
+                                                    .text.isNotEmpty &&
+                                                nameMeasureController
+                                                    .text.isNotEmpty) {
+                                              UniformMeasurement
+                                                  uniformMeasurement =
+                                                  UniformMeasurement(
+                                                symbol: symbolController.text
+                                                    .trim(),
+                                                name: nameMeasureController.text
+                                                    .trim(),
+                                                measurement: 0.0,
+                                                units: units,
+                                              );
 
-                                  measurements.add(uniformMeasurement);
+                                              measurements
+                                                  .add(uniformMeasurement);
 
-                                  setState(() {
-                                    symbolController.clear();
-                                    nameMeasureController.clear();
-                                  });
-                                } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Fill Measurement Form");
-                                }
-                              },
-                            ),
-                            Container(
-                              height: 1.0,
-                              width: size.width,
-                              color: Config.customBlue,
+                                              setState(() {
+                                                symbolController.clear();
+                                                nameMeasureController.clear();
+                                              });
+                                            } else {
+                                              showCustomToast(
+                                                  "Fill Measurement Form");
+                                            }
+                                          },
+                                        ),
+                                        Container(
+                                          height: 1.0,
+                                          width: size.width,
+                                          color: Config.customBlue,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                             const SizedBox(
                               height: 30.0,
@@ -410,8 +470,7 @@ class _AddUniformsState extends State<AddUniforms> {
                                     priceController.text.isNotEmpty) {
                                   saveUniformToFirestore();
                                 } else {
-                                  Fluttertoast.showToast(
-                                      msg: "Fill in the required fields");
+                                  showCustomToast("Please Fill All Fields");
                                 }
                               },
                             ),
