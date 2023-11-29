@@ -64,6 +64,7 @@ class _FinisherOrderDetailsState extends State<FinisherOrderDetails> {
         chosenUniforms: chosenUniforms,
         orderId: order.id!,
         userRole: "finisher",
+        typeOfWork: "",
         isAdmin: false,
         userMap: account.toMap(),
         userID: account.id);

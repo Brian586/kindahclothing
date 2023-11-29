@@ -1,8 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kindah/admin/widgets/tariff_uniform_design.dart';
 import 'package:kindah/config.dart';
 import 'package:kindah/models/tariff.dart';
 import 'package:kindah/widgets/custom_button.dart';
+
+import '../../common_functions/custom_toast.dart';
+import '../../dialog/error_dialog.dart';
+import '../../dialog/loading_dialog.dart';
+import '../../widgets/custom_popup.dart';
 
 class TariffDesign extends StatefulWidget {
   final Tariff tariff;
@@ -30,6 +36,41 @@ class _TariffDesignState extends State<TariffDesign> {
       enableEditing = false;
       // loading = false;
     });
+  }
+
+  void deleteTariff() async {
+    String result = await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => CustomPopup(
+              title: "Delete Tariff",
+              body: const Text("Do you wish to delete this tariff? "),
+              acceptTitle: "Proceed",
+              onAccepted: () => Navigator.pop(context, "proceed"),
+              onCancel: () => Navigator.pop(context, "cancel"),
+            ));
+
+    if (result == "proceed") {
+      try {
+        showLoadingDialog(context, "Deleting, Please wait...");
+
+        // Delete tariff
+        await FirebaseFirestore.instance
+            .collection("tariffs")
+            .doc(widget.tariff.id)
+            .delete();
+
+        showCustomToast("Deleted Successfully!");
+
+        Navigator.pop(context);
+      } catch (e) {
+        print(e.toString());
+
+        showErrorDialog(context, e.toString());
+
+        showCustomToast("An ERROR Occured :(");
+      }
+    }
   }
 
   Widget customTitle() {
@@ -111,16 +152,32 @@ class _TariffDesignState extends State<TariffDesign> {
                             )
                           ],
                         )
-                  : TextButton.icon(
-                      onPressed: () => toggleEnableEditing(context, true),
-                      icon: const Icon(
-                        Icons.edit_outlined,
-                        color: Colors.grey,
-                      ),
-                      label: const Text(
-                        "Edit",
-                        style: TextStyle(color: Colors.grey),
-                      ),
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () => toggleEnableEditing(context, true),
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            color: Colors.grey,
+                          ),
+                          label: const Text(
+                            "Edit",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => deleteTariff(),
+                          icon: const Icon(
+                            Icons.delete_forever,
+                            color: Colors.red,
+                          ),
+                          label: const Text(
+                            "Delete",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        )
+                      ],
                     ),
             )
           ],

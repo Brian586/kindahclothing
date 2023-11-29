@@ -85,6 +85,7 @@ class DoneOrder {
   final int? timestamp;
   final bool? isPaid;
   final String? type;
+  final String? typeOfWork;
   // final double? totalAmount;
   final Map<String, dynamic>? user;
   final Map<String, dynamic>? uniform;
@@ -96,6 +97,7 @@ class DoneOrder {
       this.timestamp,
       this.isPaid,
       required this.type,
+      required this.typeOfWork,
       // this.totalAmount,
       this.user,
       this.uniform});
@@ -109,6 +111,7 @@ class DoneOrder {
       'timestamp': timestamp,
       'isPaid': isPaid,
       'type': type,
+      'typeOfWork': typeOfWork,
       // 'totalAmount': totalAmount,
       'user': user,
       'uniform': uniform
@@ -123,6 +126,7 @@ class DoneOrder {
         timestamp: doc['timestamp'],
         isPaid: doc['isPaid'],
         type: doc['type'],
+        typeOfWork: doc['typeOfWork'],
         // totalAmount: doc['totalAmount'].toDouble(),
         user: doc['user'],
         uniform: doc['uniform']);

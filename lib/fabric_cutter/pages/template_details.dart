@@ -64,6 +64,7 @@ class _TemplateDetailsState extends State<TemplateDetails> {
           chosenUniforms: chosenUniforms,
           orderId: order.id!,
           userRole: "fabric_cutter",
+          typeOfWork: "",
           isAdmin: false,
           userMap: account.toMap(),
           userID: account.id);

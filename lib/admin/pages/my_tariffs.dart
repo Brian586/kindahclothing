@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+import 'package:kindah/admin/widgets/machine_handler_tariff_design.dart';
 import 'package:kindah/admin/widgets/tariff_design.dart';
 import 'package:kindah/common_functions/custom_toast.dart';
 import 'package:kindah/config.dart';
@@ -33,6 +34,10 @@ class _MyTariffsState extends State<MyTariffs> {
   bool uploading = false;
   String selectedUserCategory = "";
   String basedOn = "items";
+  List<Map<String, dynamic>> newMachineHandlerTariffs = [
+    {'name': "Name Labelling", 'price': 100.0},
+    {'name': "Logo", 'price': 150.0}
+  ];
 
   void uploadTariff(List<Map<String, dynamic>> tariffUniforms) async {
     setState(() {
@@ -51,7 +56,9 @@ class _MyTariffsState extends State<MyTariffs> {
             userCategory: selectedUserCategory,
             basedOn: basedOn,
             pricePerUnit: 0.00,
-            tariffs: tariffUniforms);
+            tariffs: selectedUserCategory == UserRoles.specialMachineHandler
+                ? newMachineHandlerTariffs
+                : tariffUniforms);
 
         await FirebaseFirestore.instance
             .collection("tariffs")
@@ -80,6 +87,33 @@ class _MyTariffsState extends State<MyTariffs> {
       setState(() {
         uploading = false;
       });
+    }
+  }
+
+  Widget displayMachineHandlerTariffs() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(newMachineHandlerTariffs.length, (index) {
+        return MachineHandlerTariffDesign(
+          tariff: newMachineHandlerTariffs[index],
+          onValueUpdated: updateTariffPrice,
+        );
+      }),
+    );
+  }
+
+  void updateTariffPrice(String name, double value) {
+    // Find the first map with the specified name and update its "price" field.
+    Map<String, dynamic>? map =
+        newMachineHandlerTariffs.firstWhere((item) => item["name"] == name);
+    if (map != null) {
+      map["price"] = value; // Update the "price" field
+      print("Updated $name");
+
+      print(newMachineHandlerTariffs.length);
+    } else {
+      showCustomToast("Could not update");
+      print("$name not found in the list");
     }
   }
 
@@ -149,42 +183,45 @@ class _MyTariffsState extends State<MyTariffs> {
                       const SizedBox(
                         height: 10.0,
                       ),
-                      StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection("uniforms")
-                              .snapshots(),
-                          builder:
-                              (BuildContext context, AsyncSnapshot snapshot) {
-                            if (!snapshot.hasData) {
-                              return circularProgress();
-                            } else {
-                              List<Uniform> uniformList = [];
-                              snapshot.data!.docs.forEach((doc) {
-                                Uniform newUniform = Uniform.fromDocument(doc);
-                                // create tariff json data
-                                Map<String, dynamic> newTariff = {
-                                  'name': newUniform.name,
-                                  'price': 50.0
-                                };
-                                // Save to uniform provider in tariffUniforms list Using Provider
-                                Provider.of<UniformProvider>(context,
-                                        listen: false)
-                                    .addTariffUniform(newTariff);
+                      selectedUserCategory == UserRoles.specialMachineHandler
+                          ? displayMachineHandlerTariffs()
+                          : StreamBuilder(
+                              stream: FirebaseFirestore.instance
+                                  .collection("uniforms")
+                                  .snapshots(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot snapshot) {
+                                if (!snapshot.hasData) {
+                                  return circularProgress();
+                                } else {
+                                  List<Uniform> uniformList = [];
+                                  snapshot.data!.docs.forEach((doc) {
+                                    Uniform newUniform =
+                                        Uniform.fromDocument(doc);
+                                    // create tariff json data
+                                    Map<String, dynamic> newTariff = {
+                                      'name': newUniform.name,
+                                      'price': 50.0
+                                    };
+                                    // Save to uniform provider in tariffUniforms list Using Provider
+                                    Provider.of<UniformProvider>(context,
+                                            listen: false)
+                                        .addTariffUniform(newTariff);
 
-                                uniformList.add(newUniform);
-                              });
+                                    uniformList.add(newUniform);
+                                  });
 
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children:
-                                    List.generate(uniformList.length, (index) {
-                                  return TariffUniformDesign(
-                                    uniformName: uniformList[index].name!,
+                                  return Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: List.generate(uniformList.length,
+                                        (index) {
+                                      return TariffUniformDesign(
+                                        uniformName: uniformList[index].name!,
+                                      );
+                                    }),
                                   );
-                                }),
-                              );
-                            }
-                          }),
+                                }
+                              }),
                       const SizedBox(
                         height: 10.0,
                       ),

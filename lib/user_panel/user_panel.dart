@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:kindah/fabric_cutter/fabric_cutter.dart';
 import 'package:kindah/finisher/finisher.dart';
@@ -32,6 +33,9 @@ import '../admin/pages/products_listing.dart';
 import '../admin/pages/schools_listing.dart';
 import '../admin/pages/uniforms_listing.dart';
 import '../admin/pages/users_listing.dart';
+import '../common_functions/custom_toast.dart';
+import '../common_functions/messaging_functions.dart';
+import '../dialog/error_dialog.dart';
 import '../models/account.dart';
 import '../pages/add_order_record.dart';
 import '../pages/user_intro.dart';
@@ -57,6 +61,7 @@ class _UserPanelState extends State<UserPanel> {
   @override
   void initState() {
     super.initState();
+    FirebaseMessaging.onMessage.listen(showFlutterNotification);
 
     getAccountInfo();
   }
@@ -78,25 +83,48 @@ class _UserPanelState extends State<UserPanel> {
 
     // Bypass if account is new
 
-    // if (account.isNew!) {
-    await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => UserIntro(
-                  userType: widget.userRole!,
-                )));
+    if (account.isNew! && widget.userRole != "special_machine_handler") {
+      await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => UserIntro(
+                    userType: widget.userRole!,
+                  )));
 
-    //   await FirebaseFirestore.instance
-    //       .collection("users")
-    //       .doc(widget.userID)
-    //       .update({"isNew": false});
-    // }
+      //   await FirebaseFirestore.instance
+      //       .collection("users")
+      //       .doc(widget.userID)
+      //       .update({"isNew": false});
+    }
 
     Provider.of<AccountProvider>(context, listen: false).changeAccount(account);
+
+    // getDeviceToken(account);
 
     setState(() {
       loading = false;
     });
+  }
+
+  void getDeviceToken(Account account) async {
+    try {
+      String deviceToken = await getToken();
+
+      if (!account.devices!.contains(deviceToken)) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(widget.userID)
+            .update({
+          "devices": FieldValue.arrayUnion([deviceToken])
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occured :(");
+    }
   }
 
   Widget getDash(String preferedRole) {

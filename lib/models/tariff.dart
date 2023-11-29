@@ -33,7 +33,7 @@ class Tariff {
         timestamp: doc["timestamp"],
         userCategory: doc["userCategory"],
         basedOn: doc["basedOn"],
-        pricePerUnit: doc["pricePerUnit"],
+        pricePerUnit: doc["pricePerUnit"].toDouble(),
         tariffs: doc["tariffs"]);
   }
 }

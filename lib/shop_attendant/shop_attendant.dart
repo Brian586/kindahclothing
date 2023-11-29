@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:kindah/config.dart';
 import 'package:kindah/models/account.dart';
 import 'package:kindah/providers/account_provider.dart';
+import 'package:kindah/widgets/card_button.dart';
 import 'package:kindah/widgets/custom_wrapper.dart';
 import 'package:kindah/widgets/done_order_data_source.dart';
 import 'package:kindah/widgets/no_data.dart';
@@ -75,63 +74,9 @@ class _ShopAttendantState extends State<ShopAttendant> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      InkWell(
-                        onTap: () {
-                          context
-                              .read<AccountProvider>()
-                              .changeDrawerItem("add_order");
-                          context.go(
-                              "/users/${preferedRole}s/${account.id}/add_order");
-                        },
-                        child: Card(
-                          color: Config.customBlue,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0)),
-                          child: SizedBox(
-                            height: 150.0,
-                            width: double.infinity,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const Icon(
-                                          Icons.add_rounded,
-                                          color: Colors.white,
-                                          size: 20.0,
-                                        ),
-                                        const SizedBox(
-                                          height: 5.0,
-                                        ),
-                                        Text(
-                                          "Add New Template",
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium!
-                                              .apply(color: Colors.white),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Image.asset(
-                                  "assets/images/order.png",
-                                  height: 150.0,
-                                  width: 120.0,
-                                  fit: BoxFit.contain,
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                      const CardButton(
+                          destinationUrl: "add_order",
+                          title: "Add New Template"),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: Row(

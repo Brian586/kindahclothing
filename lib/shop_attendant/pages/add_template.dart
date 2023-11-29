@@ -153,6 +153,7 @@ class _AddTemplateState extends State<AddTemplate> {
             chosenUniforms: chosenUniforms,
             orderId: order.id!,
             userRole: "shop_attendant",
+            typeOfWork: "",
             isAdmin: false,
             userMap: account.toMap(),
             userID: widget.userID);

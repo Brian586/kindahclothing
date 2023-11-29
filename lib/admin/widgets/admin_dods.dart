@@ -233,10 +233,19 @@ double adminCalculateTotalAmount(
     List<dynamic> tariffsForAppropriateTariff =
         appropriateTariff.first.tariffs!;
 
-    Map<String, dynamic> tariffMap = tariffsForAppropriateTariff.firstWhere(
-      (element) => element["name"] == order.uniform!["name"],
-      orElse: () => null,
-    );
+    Map<String, dynamic>? tariffMap;
+
+    if (order.userRole == toCoded(UserRoles.specialMachineHandler)) {
+      tariffMap = tariffsForAppropriateTariff.firstWhere(
+        (element) => element["name"] == order.typeOfWork,
+        orElse: () => null,
+      );
+    } else {
+      tariffMap = tariffsForAppropriateTariff.firstWhere(
+        (element) => element["name"] == order.uniform!["name"],
+        orElse: () => null,
+      );
+    }
 
     if (tariffMap != null) {
       return (tariffMap["price"].toDouble() * order.uniform!["quantity"])

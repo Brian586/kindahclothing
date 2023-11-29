@@ -64,6 +64,7 @@ class _TailorOrderDetailsState extends State<TailorOrderDetails> {
         chosenUniforms: chosenUniforms,
         orderId: order.id!,
         userRole: "tailor",
+        typeOfWork: "",
         isAdmin: false,
         userMap: account.toMap(),
         userID: account.id);

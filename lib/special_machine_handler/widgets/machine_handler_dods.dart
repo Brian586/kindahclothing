@@ -1,34 +1,27 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:kindah/common_functions/color_functions.dart';
-import 'package:kindah/common_functions/user_role_solver.dart';
-import 'package:kindah/models/account.dart';
 import 'package:kindah/models/tariff.dart';
 import 'package:kindah/models/uniform.dart';
-import 'package:kindah/pages/edit_order_item.dart';
-import 'package:kindah/widgets/card_button.dart';
-import 'package:kindah/widgets/custom_wrapper.dart';
-import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:kindah/models/order.dart' as template;
 
-import '../common_functions/custom_toast.dart';
-import '../config.dart';
-import '../dialog/error_dialog.dart';
-import '../dialog/loading_dialog.dart';
-import '../providers/account_provider.dart';
-import 'custom_popup.dart';
-import 'custom_tag.dart';
+import '../../common_functions/user_role_solver.dart';
+import '../../config.dart';
+import '../../models/account.dart';
+import '../../providers/account_provider.dart';
+import '../../widgets/card_button.dart';
+import '../../widgets/custom_tag.dart';
+import '../../widgets/custom_wrapper.dart';
+import '../../widgets/done_order_data_source.dart';
+import '../../widgets/progress_widget.dart';
 
-class DoneOrderDataSource extends DataGridSource {
+class MachineHandlerDODS extends DataGridSource {
   List<DataGridRow> _orders = [];
-  DoneOrderDataSource(
+  MachineHandlerDODS(
       {required BuildContext context,
       required List<template.DoneOrder> doneOrders,
       required String preferedRole,
@@ -41,6 +34,8 @@ class DoneOrderDataSource extends DataGridSource {
                       DateTime.fromMillisecondsSinceEpoch(order.timestamp!))),
               DataGridCell<String>(
                   columnName: 'item', value: order.uniform!["name"]),
+              DataGridCell<String>(
+                  columnName: 'type_of_work', value: order.typeOfWork),
               DataGridCell<int>(
                   columnName: 'quantity', value: order.uniform!["quantity"]),
               DataGridCell<String>(
@@ -81,189 +76,17 @@ class DoneOrderDataSource extends DataGridSource {
   }
 }
 
-Widget buildGridChild(DataGridCell<dynamic> dataGridCell) {
-  switch (dataGridCell.columnName) {
-    case "color":
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            height: 20.0,
-            width: 20.0,
-            color: hexToColor(dataGridCell.value.toString()),
-          ),
-          const SizedBox(width: 10.0),
-          Text(
-            findColorName(dataGridCell.value.toString()),
-            overflow: TextOverflow.ellipsis,
-          )
-        ],
-      );
-    case "status":
-      if (dataGridCell.value == true) {
-        return const Text(
-          "Paid",
-          style: TextStyle(color: Colors.green),
-        );
-      } else {
-        return const Text(
-          "Pending",
-          style: TextStyle(color: Colors.red),
-        );
-      }
-    case "total":
-      return Text(
-        "${dataGridCell.value} /=",
-        style: const TextStyle(fontWeight: FontWeight.w800),
-      );
-    case 'edit':
-      return dataGridCell.value;
-    case 'delete':
-      return dataGridCell.value;
-    default:
-      return Text(dataGridCell.value.toString());
-  }
-}
-
-Widget editOrderButton(
-    BuildContext context, String preferedRole, template.DoneOrder order) {
-  return TextButton.icon(
-    onPressed: () {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => EditOrderItem(
-                    order: order,
-                    preferedRole: preferedRole,
-                  )));
-    },
-    icon: const Icon(
-      Icons.edit,
-      color: Config.customGrey,
-    ),
-    label: const Text(
-      'Edit',
-      style: TextStyle(color: Config.customGrey),
-    ),
-  );
-}
-
-Widget deleteOrderButton(BuildContext context, template.DoneOrder order) {
-  return TextButton.icon(
-    onPressed: () => deleteOrder(context, order),
-    icon: const Icon(
-      Icons.delete_forever_outlined,
-      color: Colors.red,
-    ),
-    label: const Text(
-      'Delete',
-      style: TextStyle(color: Colors.red),
-    ),
-  );
-}
-
-void deleteOrder(BuildContext context, template.DoneOrder order) async {
-  String result = await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => CustomPopup(
-            title: "Delete Item",
-            body: const Text("Do you wish to delete this item?"),
-            acceptTitle: "Proceed",
-            onAccepted: () => Navigator.pop(context, "proceed"),
-            onCancel: () => Navigator.pop(context, "cancel"),
-          ));
-
-  if (result == "proceed") {
-    try {
-      showLoadingDialog(context, "Deleting, Please wait...");
-
-      // Delete order
-      await FirebaseFirestore.instance
-          .collection("done_orders")
-          .doc(order.id)
-          .delete();
-
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(order.user!["id"])
-          .collection("done_orders")
-          .doc(order.id)
-          .delete();
-
-      if (order.isPaid!) {
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection("order_transactions")
-            .where("order.id", isEqualTo: order.id)
-            .get();
-
-        if (querySnapshot.docs.isNotEmpty) {
-          querySnapshot.docs.forEach((element) {
-            element.reference.delete();
-          });
-        }
-      }
-
-      showCustomToast("Deleted Successfully!");
-
-      Navigator.pop(context);
-    } catch (e) {
-      print(e.toString());
-
-      showErrorDialog(context, e.toString());
-
-      showCustomToast("An ERROR Occured :(");
-    }
-  }
-}
-
-double calculateTotalAmount(
-    template.DoneOrder order, String preferedRole, List<Tariff> tariffs) {
-  List<Tariff> appropriateTariff = tariffs
-      .where((element) => toCoded(element.userCategory!) == preferedRole)
-      .toList();
-
-  if (appropriateTariff.isNotEmpty) {
-    List<dynamic> tariffsForAppropriateTariff =
-        appropriateTariff.first.tariffs!;
-
-    Map<String, dynamic>? tariffMap;
-
-    if (preferedRole == toCoded(UserRoles.specialMachineHandler)) {
-      tariffMap = tariffsForAppropriateTariff.firstWhere(
-        (element) => element["name"] == order.typeOfWork,
-        orElse: () => null,
-      );
-    } else {
-      tariffMap = tariffsForAppropriateTariff.firstWhere(
-        (element) => element["name"] == order.uniform!["name"],
-        orElse: () => null,
-      );
-    }
-
-    if (tariffMap != null) {
-      return (tariffMap["price"].toDouble() * order.uniform!["quantity"])
-          .toDouble();
-    } else {
-      return 0.0;
-    }
-  } else {
-    return 0.0;
-  }
-}
-
-class UserDataGrid extends StatefulWidget {
+class MachineHandlerDataGrid extends StatefulWidget {
   final Account account;
   final String preferedRole;
-  const UserDataGrid(
+  const MachineHandlerDataGrid(
       {super.key, required this.account, required this.preferedRole});
 
   @override
-  State<UserDataGrid> createState() => _UserDataGridState();
+  State<MachineHandlerDataGrid> createState() => _MachineHandlerDataGridState();
 }
 
-class _UserDataGridState extends State<UserDataGrid> {
+class _MachineHandlerDataGridState extends State<MachineHandlerDataGrid> {
   Widget footer(List<template.DoneOrder> doneOrders, String preferedRole,
       List<Tariff> tariffs) {
     double pendingAmount = 0.0;
@@ -377,7 +200,7 @@ class _UserDataGridState extends State<UserDataGrid> {
                     tariffs.add(tariff);
                   });
 
-                  DoneOrderDataSource doneOrderDataSource = DoneOrderDataSource(
+                  MachineHandlerDODS doneOrderDataSource = MachineHandlerDODS(
                     context: context,
                     doneOrders: doneOrders,
                     preferedRole: preferedRole,
@@ -469,6 +292,20 @@ class _UserDataGridState extends State<UserDataGrid> {
                                                 alignment: Alignment.centerLeft,
                                                 child: const Text(
                                                   'ITEM',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.w800),
+                                                ))),
+                                        GridColumn(
+                                            width: 150.0,
+                                            columnName: 'type_of_work',
+                                            label: Container(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                alignment: Alignment.centerLeft,
+                                                child: const Text(
+                                                  'DESCRIPTION',
                                                   style: TextStyle(
                                                       color: Colors.white,
                                                       fontWeight:

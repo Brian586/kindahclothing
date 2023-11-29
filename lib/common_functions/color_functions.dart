@@ -46,10 +46,14 @@ Future<List<CustomColor>> getColors(BuildContext context, String filter) async {
 // }
 
 Color hexToColor(String hexColor) {
-  hexColor = hexColor.replaceAll("#", "");
-  int colorValue = int.parse(hexColor, radix: 16);
-  return Color(colorValue)
-      .withOpacity(1.0); // You can adjust the opacity if needed
+  if (hexColor.isNotEmpty) {
+    hexColor = hexColor.replaceAll("#", "");
+    int colorValue = int.parse(hexColor, radix: 16);
+    return Color(colorValue)
+        .withOpacity(1.0); // You can adjust the opacity if needed
+  } else {
+    return Colors.transparent;
+  }
 }
 
 String findColorName(String targetHex) {
@@ -58,7 +62,7 @@ String findColorName(String targetHex) {
       return color["name"];
     }
   }
-  return ""; // Return null if the color is not found
+  return "No Color"; // Return null if the color is not found
 }
 
 // String? getKeyByValue(Map<String, String> map, String value) {

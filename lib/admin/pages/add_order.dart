@@ -157,6 +157,7 @@ class _AddOrderState extends State<AddOrder> {
         await UpdateDoneOrders.updateDoneOrders(
             chosenUniforms: chosenUniforms,
             orderId: order.id!,
+            typeOfWork: "",
             userRole: widget.isAdmin ? "Admin" : "shop_attendant",
             isAdmin: widget.isAdmin,
             userMap: widget.isAdmin ? {} : widget.userMap,

@@ -28,6 +28,7 @@ class _UserDataCardState extends State<UserDataCard> {
   int finishers = 0;
   int maxUsers = 20;
   List<AccountGroup> accountGroups = [];
+  bool isColumnSeries = false;
 
   @override
   void initState() {
@@ -54,6 +55,30 @@ class _UserDataCardState extends State<UserDataCard> {
         )
         .toList()
         .length;
+  }
+
+  /// The method returns column series to chart.
+  List<ColumnSeries<AccountGroup, dynamic>> _getDefaultColumnSeries(
+      List<AccountGroup> accountGroups) {
+    return <ColumnSeries<AccountGroup, dynamic>>[
+      ColumnSeries<AccountGroup, dynamic>(
+          animationDuration: 2500,
+          dataSource: accountGroups,
+          xValueMapper: (AccountGroup accountGroup, _) => accountGroup.date,
+          yValueMapper: (AccountGroup accountGroup, _) {
+            if (accountGroup.accounts!.length > maxUsers) {
+              setState(() {
+                maxUsers = accountGroup.accounts!.length * 2;
+              });
+            }
+
+            return accountGroup.accounts!.length;
+          },
+          width: 0.7,
+          color: Colors.deepOrange,
+          name: "New Users",
+          markerSettings: const MarkerSettings(isVisible: false))
+    ];
   }
 
   /// The method returns line series to chart.
@@ -112,9 +137,35 @@ class _UserDataCardState extends State<UserDataCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "User Analytics",
-                    style: Theme.of(context).textTheme.titleMedium,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "User Analytics",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          if (isColumnSeries) {
+                            setState(() {
+                              isColumnSeries = false;
+                            });
+                          } else {
+                            setState(() {
+                              isColumnSeries = true;
+                            });
+                          }
+                        },
+                        icon: Icon(
+                          isColumnSeries
+                              ? Icons.ssid_chart_rounded
+                              : Icons.insert_chart_outlined_rounded,
+                          color: isColumnSeries
+                              ? Config.customBlue
+                              : Colors.deepOrange,
+                        ),
+                      )
+                    ],
                   ),
                   InkWell(
                       onTap: () {
@@ -140,7 +191,7 @@ class _UserDataCardState extends State<UserDataCard> {
                 child: SfCartesianChart(
                   plotAreaBorderWidth: 0,
                   title: ChartTitle(text: 'New Users'),
-                  legend: Legend(
+                  legend: const Legend(
                       isVisible: true,
                       overflowMode: LegendItemOverflowMode.wrap),
                   primaryXAxis: CategoryAxis(
@@ -155,7 +206,9 @@ class _UserDataCardState extends State<UserDataCard> {
                       axisLine: const AxisLine(width: 0),
                       majorTickLines:
                           const MajorTickLines(color: Colors.transparent)),
-                  series: _getDefaultLineSeries(accountGroups),
+                  series: isColumnSeries
+                      ? _getDefaultColumnSeries(accountGroups)
+                      : _getDefaultLineSeries(accountGroups),
                   tooltipBehavior: TooltipBehavior(enable: true),
                 ),
               ),

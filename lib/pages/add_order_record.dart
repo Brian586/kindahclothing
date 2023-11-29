@@ -34,6 +34,7 @@ class _AddOrderRecordState extends State<AddOrderRecord> {
   TextEditingController uniformController = TextEditingController();
   String selectedSize = "";
   String selectedColor = "";
+  String typeOfWork = "";
   Uniform? selectedUniform;
   bool loading = false;
 
@@ -62,6 +63,7 @@ class _AddOrderRecordState extends State<AddOrderRecord> {
       template.DoneOrder doneOrder = template.DoneOrder(
         id: timestamp.toString(),
         orderId: "",
+        typeOfWork: typeOfWork,
         userRole: widget.preferedRole,
         timestamp: timestamp,
         isPaid: false,
@@ -258,6 +260,30 @@ class _AddOrderRecordState extends State<AddOrderRecord> {
                                 itemAsString: sizeMatcher,
                               ),
                             ),
+                            widget.preferedRole == "special_machine_handler"
+                                ? Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: DropdownSearch<String>(
+                                      popupProps: const PopupProps.menu(
+                                          // showSelectedItems: true,
+                                          ),
+                                      items: const ["Name Labelling", "Logo"],
+                                      dropdownDecoratorProps:
+                                          const DropDownDecoratorProps(
+                                        dropdownSearchDecoration:
+                                            InputDecoration(
+                                          labelText: "Type of work *",
+                                          hintText: "Embroidery work",
+                                        ),
+                                      ),
+                                      onChanged: (str) {
+                                        setState(() {
+                                          typeOfWork = str!;
+                                        });
+                                      },
+                                    ),
+                                  )
+                                : Container(),
                             Padding(
                               padding: const EdgeInsets.all(10.0),
                               child: DropdownSearch<CustomColor>(
@@ -329,7 +355,19 @@ class _AddOrderRecordState extends State<AddOrderRecord> {
                                     selectedSize.isNotEmpty &&
                                     selectedColor.isNotEmpty &&
                                     selectedUniform != null) {
-                                  saveRecordToFirestore(account);
+                                  switch (widget.preferedRole) {
+                                    case 'special_machine_handler':
+                                      if (typeOfWork.isNotEmpty) {
+                                        saveRecordToFirestore(account);
+                                      } else {
+                                        showCustomToast(
+                                            "Fill in the Type of work field");
+                                      }
+                                      break;
+                                    default:
+                                      saveRecordToFirestore(account);
+                                      break;
+                                  }
                                 } else {
                                   showCustomToast(
                                       "Fill in the required fields");

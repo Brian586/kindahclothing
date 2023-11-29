@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:kindah/admin/pages/add_products.dart';
 import 'package:kindah/admin/pages/add_schools.dart';
@@ -23,6 +24,9 @@ import 'package:kindah/widgets/progress_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
+import '../common_functions/custom_toast.dart';
+import '../common_functions/messaging_functions.dart';
+import '../dialog/error_dialog.dart';
 import 'pages/add_order.dart';
 import 'pages/add_uniforms.dart';
 import 'pages/edit_order.dart';
@@ -49,6 +53,7 @@ class _AdminPanelState extends State<AdminPanel> {
   @override
   void initState() {
     super.initState();
+    FirebaseMessaging.onMessage.listen(showFlutterNotification);
 
     getAdminInfo();
   }
@@ -67,9 +72,34 @@ class _AdminPanelState extends State<AdminPanel> {
 
     Provider.of<AdminProvider>(context, listen: false).changeAdmin(admin);
 
+    // getDeviceToken(admin);
+
     setState(() {
       loading = false;
     });
+  }
+
+  void getDeviceToken(Admin admin) async {
+    try {
+      String deviceToken = await getToken();
+
+      print(deviceToken);
+
+      if (!admin.devices!.contains(deviceToken)) {
+        await FirebaseFirestore.instance
+            .collection("admins")
+            .doc("0001")
+            .update({
+          "devices": FieldValue.arrayUnion([deviceToken])
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+
+      showErrorDialog(context, e.toString());
+
+      showCustomToast("An ERROR Occured :(");
+    }
   }
 
   Widget buildAdminBody() {

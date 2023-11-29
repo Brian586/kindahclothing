@@ -95,9 +95,9 @@ class _PaymentsListingState extends State<PaymentsListing> {
               ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection("done_orders")
-                .snapshots(),
+            stream: FirebaseFirestore.instance.collection("done_orders").where(
+                "userRole",
+                whereIn: ["tailor", "fabric_cutter"]).snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return circularProgress();
@@ -231,7 +231,7 @@ class _PaymentsListingState extends State<PaymentsListing> {
                                           ))),
                                   GridColumn(
                                       columnName: 'color',
-                                      width: 120.0,
+                                      width: 180.0,
                                       label: Container(
                                           padding: const EdgeInsets.all(16.0),
                                           alignment: Alignment.centerRight,

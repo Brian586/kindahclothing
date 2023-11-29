@@ -114,6 +114,7 @@ class UpdateDoneOrders {
   static Future<void> updateDoneOrders({
     required List<Uniform> chosenUniforms,
     required String orderId,
+    required String typeOfWork,
     required String userRole,
     required bool isAdmin,
     required Map<String, dynamic> userMap,
@@ -130,6 +131,7 @@ class UpdateDoneOrders {
         timestamp: timestamp,
         isPaid: false,
         type: "from_order",
+        typeOfWork: typeOfWork,
         user: userMap,
         uniform: uniform.toMap(),
       );

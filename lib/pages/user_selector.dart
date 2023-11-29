@@ -69,7 +69,7 @@ class _UserSelectorState extends State<UserSelector> {
                       height: 20.0,
                     ),
                     Text(
-                      "18:20 pm, 05 NOV 2023 Version",
+                      "02:40 am, 27 NOV 2023 Version",
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     const SizedBox(

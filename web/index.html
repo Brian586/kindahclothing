@@ -127,6 +127,7 @@
     import { getFirestore } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js";
     import { getStorage } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js";
+    import { getMessaging } from "https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -163,6 +164,14 @@
         }
       });
     });
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      });
+    }
   </script>
 </body>
 

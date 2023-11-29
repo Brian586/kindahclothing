@@ -15,6 +15,7 @@ class Admin {
   final int? products;
   final int? schools;
   final int? uniforms;
+  final List<dynamic>? devices;
 
   Admin(
       {this.id,
@@ -30,7 +31,8 @@ class Admin {
       this.uniforms,
       required this.specialMachineHandler,
       required this.finishers,
-      this.phone});
+      this.phone,
+      required this.devices});
 
   Map<String, dynamic> toMap() {
     return {
@@ -47,7 +49,8 @@ class Admin {
       "products": products,
       "schools": schools,
       "uniforms": uniforms,
-      "finishers": finishers
+      "finishers": finishers,
+      "devices": devices
     };
   }
 
@@ -66,6 +69,7 @@ class Admin {
         finishers: doc["finishers"],
         uniforms: doc["uniforms"],
         specialMachineHandler: doc["specialMachineHandler"],
-        phone: doc["phone"]);
+        phone: doc["phone"],
+        devices: doc["devices"]);
   }
 }
