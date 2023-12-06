@@ -4,3 +4,5 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 git add .
 git commit -m "Kindah Clothing"
 git push origin master
+
+firebase deploy --only hosting:kindahclothing
